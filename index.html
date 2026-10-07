@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tempello</title>
+<style>
+  :root {
+    --ground: #F2F3F4;        /* neutral grey page ground */
+    --panel: #FAFAFA;         /* welcome panel */
+    --card: #FFFFFF;
+    --ink: #1F2328;           /* 16:1 on white */
+    --muted: #596069;         /* 6.7:1 on white, 5.8:1 on the ground */
+    --soft: #596069;          /* second half of the headline, ~6:1 on the panel */
+    --edge: #8A9099;          /* field edges, 3.3:1 on white (WCAG 1.4.11) */
+    --line: #E3E4E6;          /* dividers */
+    --brand: #B3470A;         /* Tempello orange, 5.49:1 on white */
+    --brand-dark: #8F3906;
+    --brand-tint: #FFF1E6;
+    --dot: #F96706;           /* wordmark dot and glow only, never text */
+    --error: #B42318;
+    --font: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--font); }
+
+  .page { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(320px, 5fr) 7fr; }
+
+  /* ---------- welcome panel ---------- */
+  .welcome { position: sticky; top: 0; height: 100vh; height: 100dvh; align-self: start; overflow: hidden; background: var(--panel); padding: 56px 56px 48px; display: flex; flex-direction: column; justify-content: space-between; isolation: isolate; }
+  .welcome .art { position: absolute; display: block; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+  .welcome .art-m { display: none; }
+  .brand { display: block; line-height: 0; }
+  .brand img { height: 44px; width: auto; display: block; }
+  .welcome { justify-content: flex-start; }
+  .welcome > div:not(.brand) { margin-top: clamp(40px, 12vh, 140px); }
+  .welcome h1 { font-size: clamp(34px, 3.7vw, 54px); line-height: 1.04; letter-spacing: -.025em; font-weight: 600; margin: 0 0 26px; }
+  .welcome h1 span { color: var(--soft); display: block; text-wrap: balance; }
+  .welcome p { margin: 0 0 14px; max-width: 38ch; font-size: 18px; line-height: 1.5; }
+  .welcome .small { color: var(--muted); font-size: 15px; }
+
+  /* ---------- form card ---------- */
+  .formwrap { position: relative; z-index: 1; padding: 48px 32px; display: flex; align-items: center; justify-content: center; }
+  .card { width: 100%; max-width: 560px; background: var(--card); border-radius: 28px; padding: 48px 40px 40px;
+          box-shadow: 0 1px 2px rgba(31,35,40,.04), 0 12px 40px rgba(31,35,40,.08); }
+  .eyebrow { font-size: 13px; font-weight: 600; color: var(--brand); text-transform: uppercase; letter-spacing: 1.2px; margin: 0 0 6px; }
+  h2 { font-size: 24px; line-height: 1.2; margin: 0 0 8px; font-weight: 600; letter-spacing: -.01em; }
+  .lede { color: var(--muted); margin: 0 0 28px; font-size: 15px; }
+
+  .progress { display: none; margin-bottom: 22px; }
+  .progress .top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--muted); margin-bottom: 8px; min-height: 24px; }
+  .progress .bar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .progress .bar span { display: block; height: 100%; width: 33.33%; background: var(--brand); border-radius: 4px; transition: width .25s ease; }
+  .back { background: none; border: 0; min-height: 48px; padding: 12px 16px; margin: -12px -16px; font: 600 14px var(--font); color: var(--brand); cursor: pointer; border-radius: 6px; }
+  .back[hidden] { display: none; }
+  .back:focus-visible { outline: 3px solid rgba(179,71,10,.3); outline-offset: 2px; }
+
+  .step + .step { margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .step-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; margin: 0 0 20px; }
+  .step-title b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--brand-tint); color: var(--brand-dark); font-size: 12px; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { margin-bottom: 24px; }
+  label, .legend { display: block; font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+  .opt { font-weight: 400; color: var(--muted); }
+  .help { color: var(--muted); font-size: 14px; margin: -2px 0 8px; }
+  input[type=text], input[type=email], select {
+    width: 100%; font: inherit; color: var(--ink); background: #fff; appearance: none; -webkit-appearance: none;
+    border: 1px solid var(--edge); border-radius: 14px; padding: 12px 16px; min-height: 52px;
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23596069' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+  input:hover, select:hover { background-color: #FCFCFB; border-color: #6A7079; }
+  input:focus-visible, select:focus-visible { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(179,71,10,.22); }
+  .invalid { border-color: var(--error) !important; }
+  .err { color: var(--error); font-size: 14px; margin: 6px 0 0; }
+  .ok-mark { display: none; }
+
+  .sizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .size { position: relative; }
+  .size input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .size span { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 1px solid var(--edge); border-radius: 999px; font-weight: 600; background: #fff; transition: all .15s; }
+  .size span svg { width: 16px; height: 16px; stroke: var(--brand-dark); fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; display: none; }
+  .size:hover span { border-color: #6A7079; }
+  .size input:checked + span { background: var(--brand-tint); border: 1.5px solid var(--brand); color: var(--brand-dark); }
+  .size input:checked + span svg { display: block; }
+  .size input:focus-visible + span { box-shadow: 0 0 0 3px rgba(179,71,10,.25); }
+
+  .actions { margin-top: 8px; }
+  .primary { width: 100%; min-height: 56px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 16px var(--font); cursor: pointer;
+             box-shadow: 0 6px 16px rgba(179,71,10,.25); transition: background .15s, transform .1s; }
+  .primary:hover { background: var(--brand-dark); }
+  .primary:active { transform: translateY(1px); }
+  .primary:focus-visible { outline: 3px solid rgba(179,71,10,.35); outline-offset: 3px; }
+  .primary[disabled] { opacity: .65; cursor: default; }
+  .note { color: var(--muted); font-size: 13px; margin: 14px 0 0; text-align: center; }
+  .banner { display: none; background: var(--brand-tint); border-left: 4px solid var(--brand); padding: 12px 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; }
+
+  .done { display: none; text-align: center; padding: 24px 0 8px; }
+  .done .check { width: 72px; height: 72px; border-radius: 50%; background: var(--brand-tint); display: grid; place-items: center; margin: 0 auto 22px; }
+  .done .check svg { width: 34px; height: 34px; stroke: var(--brand); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; stroke-dashoffset: 30; }
+  .done.show .check svg { animation: draw .5s ease .1s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .done h2:focus { outline: none; }
+
+  /* ---------- tablet and phone ---------- */
+  @media (max-height: 700px) { .welcome p:not(.small) { display: none; } }
+  @media (max-width: 860px) {
+    .page { grid-template-columns: 1fr; }
+    .welcome { position: relative; height: auto; align-self: auto; padding: 24px 20px 48px; gap: 14px; }
+    .welcome .art-d { display: none; }
+    .welcome .art-m { display: block; }
+    .welcome h1 { font-size: 28px; margin: 0 0 6px; }
+    .welcome > div:not(.brand) { margin-top: 18px; }
+    .welcome .brand + div p, .welcome .small { display: none; }
+    .welcome .tag { display: block; }
+    .formwrap { padding: 0 14px calc(116px + env(safe-area-inset-bottom)); margin-top: -24px; align-items: flex-start; }
+    .card { border-radius: 24px; padding: 26px 20px 24px; }
+    h2 { font-size: 22px; }
+    .progress { display: block; }
+    .step + .step { margin-top: 0; padding-top: 0; border-top: 0; }
+    .step-title { display: none; }
+    .actions { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); backdrop-filter: blur(8px); box-shadow: 0 -8px 24px rgba(31,35,40,.08); z-index: 5; }
+    .note { display: none; }
+  }
+  @media (max-width: 400px) { .row.stack { grid-template-columns: 1fr; gap: 0; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } .done .check svg { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <aside class="welcome">
+    <!-- decorative: soft warm glow only; no information lives here -->
+    <svg class="art art-d" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="blur" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="46"/></filter>
+      </defs>
+      <g filter="url(#blur)">
+        <ellipse cx="170" cy="700" rx="260" ry="90" fill="#F9C79A" opacity=".75"/>
+        <ellipse cx="420" cy="750" rx="240" ry="80" fill="#E8844A" opacity=".5"/>
+        <ellipse cx="300" cy="790" rx="300" ry="60" fill="#EADBC8" opacity=".8"/>
+      </g>
+    </svg>
+    <svg class="art art-m" viewBox="0 0 600 800" preserveAspectRatio="xMaxYMin slice" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="blurm" x="-50%" y="-150%" width="200%" height="400%"><feGaussianBlur stdDeviation="46"/></filter>
+      </defs>
+      <g filter="url(#blurm)" opacity=".4">
+        <ellipse cx="480" cy="120" rx="240" ry="150" fill="#F9C79A" opacity=".75"/>
+        <ellipse cx="560" cy="230" rx="200" ry="120" fill="#E8844A" opacity=".5"/>
+      </g>
+    </svg>
+
+    <div class="brand"><img src="data:image/png;base64,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" alt="Tempello" width="767" height="182"></div>
+    <div>
+      <h1>Thank you, team, <span>for all the great work you do!</span></h1>
+      <p>Great things are happening, and better ones are coming. We couldn't have come this far without you.</p>
+      <p class="small">We'll use these details to stay in touch and send you your team shirt.</p>
+    </div>
+  </aside>
+
+  <main class="formwrap">
+    <div class="card">
+      <form id="f" novalidate>
+        <p class="eyebrow">Your details</p>
+        <h2>A few details about you</h2>
+        <p class="lede">About two minutes. Your answers stay private.</p>
+
+        <div class="progress" id="progress">
+          <div class="top"><span id="stepText">Step 1 of 3</span><button type="button" class="back" id="back" hidden>Back</button></div>
+          <div class="bar" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" id="bar"><span id="barFill"></span></div>
+        </div>
+
+        <div id="banner" class="banner" role="status"></div>
+
+        <section class="step" data-step="1">
+          <h3 class="step-title"><b>01</b>You</h3>
+          <div class="row stack">
+            <div class="field">
+              <label for="first">First name</label>
+              <input type="text" id="first" name="first" autocomplete="given-name" required>
+              <p class="err" data-for="first"></p>
+            </div>
+            <div class="field">
+              <label for="last">Last name</label>
+              <input type="text" id="last" name="last" autocomplete="family-name" required>
+              <p class="err" data-for="last"></p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="role">Role or title</label>
+            <p class="help">For example: Designer, Developer, Project Manager</p>
+            <input type="text" id="role" name="role" autocomplete="organization-title" required>
+            <p class="err" data-for="role"></p>
+          </div>
+          <div class="field">
+            <span class="legend">Birthday <span class="opt">(optional)</span></span>
+            <p class="help">Skip it if you prefer. Day and month are enough.</p>
+            <div class="row">
+              <select id="bmonth" name="bmonth" aria-label="Birthday month"><option value="">Month</option></select>
+              <select id="bday" name="bday" aria-label="Birthday day"><option value="">Day</option></select>
+            </div>
+          </div>
+        </section>
+
+        <section class="step" data-step="2">
+          <h3 class="step-title"><b>02</b>Where to send it</h3>
+          <div class="field">
+            <label for="country">Country</label>
+            <select id="country" name="country" autocomplete="country-name" required><option value="">Select your country</option></select>
+            <p class="err" data-for="country"></p>
+          </div>
+          <div class="field">
+            <label for="line1">Street address</label>
+            <input type="text" id="line1" name="line1" autocomplete="address-line1" required>
+            <p class="err" data-for="line1"></p>
+          </div>
+          <div class="field">
+            <label for="line2">Apartment, suite, or other <span class="opt">(optional)</span></label>
+            <input type="text" id="line2" name="line2" autocomplete="address-line2">
+          </div>
+          <div class="row stack">
+            <div class="field">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" autocomplete="address-level2" required>
+              <p class="err" data-for="city"></p>
+            </div>
+            <div class="field">
+              <label for="state">State or province <span class="opt">(optional)</span></label>
+              <input type="text" id="state" name="state" autocomplete="address-level1">
+            </div>
+          </div>
+          <div class="row stack">
+            <div class="field">
+              <label for="postal">Postal code</label>
+              <input type="text" id="postal" name="postal" autocomplete="postal-code" required>
+              <p class="err" data-for="postal"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="step" data-step="3">
+          <h3 class="step-title"><b>03</b>Almost done</h3>
+          <div class="field" role="radiogroup" aria-labelledby="sizeLabel">
+            <span class="legend" id="sizeLabel">T-shirt size</span>
+            <p class="help">Choose the size you would wear.</p>
+            <div class="sizes">
+              <label class="size"><input type="radio" name="size" value="S"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>S</span></label>
+              <label class="size"><input type="radio" name="size" value="M"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>M</span></label>
+              <label class="size"><input type="radio" name="size" value="L"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>L</span></label>
+            </div>
+            <p class="err" data-for="size"></p>
+          </div>
+          <div class="field">
+            <label for="work">Work email</label>
+            <p class="help">Your Tempello address</p>
+            <input type="email" id="work" name="work" autocomplete="email" inputmode="email" required>
+            <p class="err" data-for="work"></p>
+          </div>
+          <div class="field">
+            <label for="personal">Personal email</label>
+            <p class="help">For anything we can't send to your work email</p>
+            <input type="email" id="personal" name="personal" autocomplete="email" inputmode="email" required>
+            <p class="err" data-for="personal"></p>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button class="primary" type="submit" id="send">Send my details</button>
+          <p class="note">Please never enter passwords here.</p>
+        </div>
+      </form>
+
+      <section class="done" id="done" aria-live="polite">
+        <div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h2 id="doneTitle" tabindex="-1">Thanks, you're all set.</h2>
+        <p class="lede">Your details are in. We're glad you're part of Tempello. You can close this page.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ---- Connection to the Google Form (answers still land in the private Sheet) ----
+   Fill these in once; until then the page runs in PREVIEW mode and sends nothing. */
+const CONFIG = {
+  FORM_ID: "1FAIpQLSf-UKcWmOYMk-NtS9TsZTzmgKr13HhOuPuCpXX1qVyZXLCWrg",
+  ENTRY: { first: "267309636", last: "1353652393", role: "787712298", birthday: "1461063284", country: "1151762955", line1: "185207361", line2: "305055626", city: "1339229709", state: "44643135", postal: "645258282", size: "1439449457", work: "873689349", personal: "1156779872" }
+};
+const CONNECTED = CONFIG.FORM_ID && Object.values(CONFIG.ENTRY).every(Boolean);
+
+const $ = id => document.getElementById(id);
+
+/* Birthday: day and month only */
+["January","February","March","April","May","June","July","August","September","October","November","December"]
+  .forEach((m, i) => $("bmonth").add(new Option(m, String(i + 1).padStart(2, "0"))));
+for (let d = 1; d <= 31; d++) $("bday").add(new Option(d, String(d).padStart(2, "0")));
+
+/* Country list: names come from the browser, sorted A to Z */
+const REGION_CODES = "AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR IO VG BN BG BF BI KH CM CA CV BQ KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF KP MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SJ SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB US UY UM VI UZ VU VA VE VN WF EH YE ZM ZW".split(" ");
+const regionNames = new Intl.DisplayNames([navigator.language || "en"], { type: "region" });
+REGION_CODES.map(c => { let n = ""; try { n = regionNames.of(c); } catch (e) {} return n && n !== c ? n : c; })
+  .sort((a, b) => a.localeCompare(b))
+  .forEach(n => $("country").add(new Option(n, n)));
+
+/* ---- Validation ---- */
+const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+const rules = {
+  first:    v => v.trim() ? "" : "Please enter your first name.",
+  last:     v => v.trim() ? "" : "Please enter your last name.",
+  role:     v => v.trim() ? "" : "Please enter your role or title.",
+  country:  v => v ? "" : "Please select your country.",
+  line1:    v => v.trim().length >= 4 ? "" : "Please enter your street address.",
+  city:     v => v.trim() ? "" : "Please enter your city.",
+  postal:   v => v.trim() ? "" : "Please enter your postal code.",
+  work:     v => emailOk(v) ? "" : "Please enter a valid email address.",
+  personal: v => emailOk(v) ? "" : "Please enter a valid email address."
+};
+const stepFields = { 1: ["first", "last", "role"], 2: ["country", "line1", "city", "postal"], 3: ["work", "personal"] };
+
+function setErr(name, msg) {
+  const el = document.querySelector('[data-for="' + name + '"]');
+  if (el) el.textContent = msg;
+  const input = $(name);
+  if (input) { input.classList.toggle("invalid", !!msg); input.setAttribute("aria-invalid", msg ? "true" : "false"); }
+}
+Object.keys(rules).forEach(n => $(n).addEventListener("blur", () => setErr(n, rules[n]($(n).value))));
+
+/* Returns the first invalid element among the step's fields (and marks every one) */
+function checkStep(n) {
+  let firstBad = null;
+  stepFields[n].forEach(name => {
+    const msg = rules[name]($(name).value);
+    setErr(name, msg);
+    if (msg && !firstBad) firstBad = $(name);
+  });
+  if (n === 3) {
+    const picked = document.querySelector('input[name="size"]:checked');
+    setErr("size", picked ? "" : "Please choose a size.");
+    if (!picked && !firstBad) firstBad = document.querySelector('input[name="size"]');
+  }
+  return firstBad;
+}
+
+/* ---- Steps: three short screens on a phone, one page on a laptop ---- */
+const mq = window.matchMedia("(max-width: 860px)");
+const steps = [...document.querySelectorAll(".step")];
+let step = 1;
+
+function render() {
+  const mobile = mq.matches;
+  steps.forEach(s => { s.style.display = (!mobile || Number(s.dataset.step) === step) ? "" : "none"; });
+  $("stepText").textContent = "Step " + step + " of 3";
+  $("barFill").style.width = (step / 3 * 100) + "%";
+  $("bar").setAttribute("aria-valuenow", step);
+  $("bar").setAttribute("aria-valuetext", "Step " + step + " of 3");
+  $("back").hidden = step === 1;
+  $("send").textContent = (mobile && step < 3) ? "Continue" : "Send my details";
+}
+mq.addEventListener("change", render);
+$("back").addEventListener("click", () => { step = Math.max(1, step - 1); render(); $("f").scrollIntoView({ behavior: "smooth", block: "start" }); focusStep(); });
+render();
+
+function focusStep() { const el = steps[step - 1].querySelector("input:not([type=radio]), select"); if (el) el.focus({ preventScroll: true }); }
+function go(n) { step = n; render(); window.scrollTo({ top: 0, behavior: "smooth" }); focusStep(); }
+
+$("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const mobile = mq.matches;
+
+  if (mobile && step < 3) {                      /* Continue to the next screen */
+    const bad = checkStep(step);
+    if (bad) { bad.focus(); return; }
+    go(step + 1);
+    return;
+  }
+
+  let bad = null, badStep = 0;                   /* Send: check everything */
+  [1, 2, 3].forEach(n => { const b = checkStep(n); if (b && !bad) { bad = b; badStep = n; } });
+  if (bad) { if (mobile && badStep !== step) { step = badStep; render(); } bad.focus(); return; }
+
+  const banner = $("banner");
+  banner.style.display = "none";
+  if (!CONNECTED) {
+    banner.style.display = "block";
+    banner.textContent = "Preview mode: this page is not connected to the form yet, so nothing was sent.";
+    banner.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  const size = document.querySelector('input[name="size"]:checked');
+  const bm = $("bmonth").value, bd = $("bday").value;
+  const body = new FormData();
+  const put = (k, v) => body.append("entry." + CONFIG.ENTRY[k], v);
+  put("first", $("first").value.trim());
+  put("last", $("last").value.trim());
+  put("role", $("role").value.trim());
+  put("birthday", bm && bd ? bm + "-" + bd : "");
+  put("country", $("country").value);
+  put("line1", $("line1").value.trim());
+  put("line2", $("line2").value.trim());
+  put("city", $("city").value.trim());
+  put("state", $("state").value.trim());
+  put("postal", $("postal").value.trim());
+  put("size", size.value);
+  put("work", $("work").value.trim());
+  put("personal", $("personal").value.trim());
+
+  $("send").disabled = true; $("send").textContent = "Sending...";
+  try {
+    /* no-cors: Google gives no readable reply, so a network failure is the only error we can detect */
+    await fetch("https://docs.google.com/forms/d/e/" + CONFIG.FORM_ID + "/formResponse", { method: "POST", mode: "no-cors", body });
+    $("f").style.display = "none";
+    $("doneTitle").textContent = "Thanks, " + $("first").value.trim() + ". You're all set.";
+    $("done").style.display = "block";
+    requestAnimationFrame(() => { $("done").classList.add("show"); $("doneTitle").focus(); });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) {
+    banner.style.display = "block";
+    banner.textContent = "We couldn't send your details. Please check your connection and try again.";
+    $("send").disabled = false; render();
+  }
+});
+</script>
+</body>
+</html>
