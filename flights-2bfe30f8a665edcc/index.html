@@ -4,876 +4,355 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
 <title>ClioCon Flight Picker</title>
+<!-- Built by build-picker.mjs from seat-evidence/seat-evidence.csv (32 rows, 32 offered). Derived from flight-picker-v6.html. -->
 <style>
-  :root {
-    --bg: #fbfbfa; --card: #ffffff; --ink: #1f2937; --muted: #5b6472; --line: #e5e7eb;
-    --accent: #2f5fd0; --accent-soft: #eef3ff; --good: #1f7a4d; --good-soft: #eaf6ef;
-    --warn: #8a5200; --warn-soft: #fff4e0;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: -0.01em; }
-  h2 { font-size: 1.15rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 18px; }
-  .draft { display: inline-block; background: var(--warn-soft); color: var(--warn); border-radius: 999px; padding: 2px 10px; font-size: .78rem; font-weight: 600; margin-bottom: 10px; }
-  .block { margin-bottom: 28px; }
-  .step { background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: .8rem; border-radius: 999px; padding: 2px 10px; margin-right: 8px; vertical-align: middle; }
-  .lead { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
+  :root { color-scheme: light;
+    --bg:#F2F3F4; --card:#fff; --ink:#1F2328; --muted:#4D5560; --accent:#B3470A; --peach:#FFF1E6; --line:#DADDE1; --navy:#1F3556; --navytint:#E9EFF7;
+    --ok:#14532D; --ok-bg:#E3F3E6; --ok-line:#9FCFAA; --tight:#7A3E00; --tight-bg:#FFE9D2; --tight-line:#E9B98A; --unk:#3F4852; --unk-bg:#ECEEF1; --unk-line:#C5CAD1;
+    --sans: system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; }
+  * { box-sizing:border-box; }
+  html { background:var(--bg); scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 var(--sans); border-top:6px solid #F96706; -webkit-text-size-adjust:100%; }
+  .wrap { max-width:640px; margin:0 auto; padding:16px 16px 56px; }
+  p { margin:4px 0; }
 
-  /* plans */
-  .plans { display: grid; gap: 12px; }
-  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-  .plan.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-  .plan-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
-  .plan-name { font-weight: 700; font-size: 1.05rem; }
-  .plan-price { font-weight: 700; font-size: 1.3rem; color: var(--good); }
-  .plan-price small { color: var(--muted); font-weight: 500; font-size: .75rem; }
-  .plan p { margin: 2px 0 8px; color: var(--muted); font-size: .9rem; }
-  .plan ul { list-style: none; padding: 0; margin: 0 0 12px; font-size: .92rem; }
-  .plan li { padding: 3px 0; }
-  .plan li b { display: inline-block; min-width: 62px; }
-  .plan .caution { color: var(--warn); font-size: .85rem; margin: 0 0 10px; }
-  button { font: inherit; font-weight: 600; border: 0; border-radius: 10px; padding: 12px 16px; background: var(--accent); color: #fff; cursor: pointer; }
-  button.ghost { background: #fff; color: var(--accent); border: 1px solid #b9c7ee; }
-  button:disabled { background: #c9d1e4; color: #fff; cursor: not-allowed; }
-  .plan button { width: 100%; }
+  /* top bar, notice, nav (itinerary) */
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:0 0 10px; }
+  .rule { height:3px; background:#F96706; margin:0 0 4px; border:0; }
+  .logo { display:block; height:28px; width:auto; }
+  .event { color:var(--muted); font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; text-align:right; line-height:1.3; }
+  .internal { background:var(--peach); border:1px solid var(--accent); border-radius:12px; padding:10px 14px; margin:14px 0; font-size:15px; }
+  nav { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; margin:8px -16px 0; padding:8px 16px; position:sticky; top:0; z-index:5; background:var(--bg); scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+  nav a { flex:none; display:inline-flex; align-items:center; min-height:44px; color:var(--accent); background:#fff; border:1px solid var(--line); border-radius:999px; padding:0 16px; font-size:15px; white-space:nowrap; text-decoration:none; }
+  nav a.on { background:var(--navy); border-color:var(--navy); color:#fff; }
+  a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+
+  /* type */
+  .eyebrow { display:block; color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+  .hero { padding:14px 0 0; }
+  .h1row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  h1 { margin:2px 0 4px; font-size:clamp(28px,6vw,40px); line-height:1.1; color:var(--navy); font-weight:700; }
+  .star { width:44px; height:44px; flex:none; }
+  .sub { color:var(--muted); margin:0 0 8px; font-size:15px; }
+  section.page { margin-top:28px; scroll-margin-top:72px; }
+  h2 { color:var(--navy); font-size:15px; letter-spacing:.06em; text-transform:uppercase; margin:24px 0 8px; display:flex; align-items:center; gap:8px; }
+  h2:before { content:""; flex:none; width:8px; height:8px; border-radius:50%; background:#F26A0A; }
+  section.page > h2:first-child, section.page > .eyebrow + h2 { margin-top:2px; }
+  .lead { color:var(--muted); font-size:15px; margin:0 0 10px; }
+  .micro { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+
+  /* cards, callouts, dl labels */
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin:10px 0; }
+  .callout { background:var(--peach); border-left:5px solid var(--accent); border-radius:12px; padding:12px 16px; margin:12px 0; }
+  .callout dl, .lines { margin:0; display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; }
+  .callout dt, .lines dt { color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding-top:3px; }
+  .callout dd, .lines dd { margin:0; }
+  .callout dd b { color:var(--navy); font-size:18px; line-height:1.2; font-weight:700; }
+  .callout dd .al { color:var(--muted); font-size:14px; margin-left:8px; }
+  .legh { color:var(--navy); font-weight:700; font-size:15px; margin:0 0 6px; }
+
+  /* seat badges */
+  .pill { display:inline-flex; align-items:center; border:1px solid; border-radius:999px; padding:3px 12px; font-size:13px; font-weight:700; letter-spacing:.04em; line-height:1.3; white-space:nowrap; }
+  .pill.ok { background:var(--ok-bg); color:var(--ok); border-color:var(--ok-line); }
+  .pill.tight { background:var(--tight-bg); color:var(--tight); border-color:var(--tight-line); }
+  .pill.unknown { background:var(--unk-bg); color:var(--unk); border-color:var(--unk-line); }
+  .pills { display:flex; gap:6px; flex-wrap:wrap; }
+  .caution { color:var(--accent); font-size:14px; font-weight:600; margin:10px 0 0; }
+
+  /* plan cards */
+  .plan { margin:12px 0; }
+  .plan.on { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+  .plan-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .plan-name { margin:0; font-size:19px; line-height:1.2; color:var(--navy); }
+  .plan-price { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .plan-price span { color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+  .plan-price b { color:var(--navy); font-size:34px; line-height:1; }
+  .plan-price small, .price small { display:block; margin-top:4px; color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .blurb { color:var(--muted); font-size:15px; margin:6px 0 2px; }
+  .plan .lines { margin-top:12px; align-items:center; }
+
+  /* buttons */
+  button { font:inherit; font-weight:700; cursor:pointer; border-radius:999px; min-height:44px; padding:0 18px; border:1px solid var(--line); background:#fff; color:var(--accent); display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  button:hover:not(:disabled) { background:var(--peach); }
+  button:disabled { background:#E9EBEE; color:#4D5560; border-color:var(--line); cursor:not-allowed; }
+  .plan button { width:100%; margin-top:12px; }
+  .plan.on button { background:var(--navy); color:#fff; border-color:var(--navy); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); min-height:64px; text-align:left; justify-content:flex-start; padding:10px 22px; }
+  button.primary:hover:not(:disabled) { background:#8F3908; }
+  button.primary:disabled { background:#E9EBEE; color:#4D5560; border-color:var(--line); }
+  button.primary .bt { display:flex; flex-direction:column; line-height:1.25; }
+  button.primary .bt strong { font-size:17px; }
+  button.primary .bt small { font-size:14px; font-weight:400; }
+  .i { width:22px; height:22px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 
   /* build your own */
-  section.leg { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
-  .route { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
-  .days { display: flex; gap: 8px; margin-bottom: 12px; }
-  .days button { flex: 1; background: #fff; color: var(--ink); border: 1px solid #cfd4dc; }
-  .days button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
-  .daynote { color: var(--warn); font-size: .85rem; margin: -4px 0 12px; }
-  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
-  select { width: 100%; font: inherit; color: var(--ink); background: #fff; border: 1px solid #cfd4dc; border-radius: 10px; padding: 12px 40px 12px 12px; appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='2'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; }
-  select:focus, textarea:focus, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .detail { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfd; padding: 14px; }
-  .detail.empty { color: var(--muted); font-style: italic; text-align: center; padding: 18px 14px; }
-  .d-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .d-airline { font-weight: 700; }
-  .d-flight { color: var(--muted); font-size: .88rem; }
-  .price { font-size: 1.4rem; font-weight: 700; color: var(--good); line-height: 1.1; text-align: right; }
-  .price small { display: block; font-size: .72rem; color: var(--muted); font-weight: 500; }
-  .times { display: flex; align-items: center; gap: 12px; margin: 14px 0; }
-  .t b { font-size: 1.25rem; display: block; line-height: 1.2; }
-  .t span { color: var(--muted); font-size: .82rem; }
-  .bar { flex: 1; height: 2px; background: var(--line); position: relative; min-width: 36px; }
-  .bar i { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #fcfcfd; padding: 0 8px; font-style: normal; font-size: .78rem; color: var(--muted); white-space: nowrap; }
-  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 20px; margin: 0; }
-  .grid dt { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
-  .grid dd { margin: 0; font-weight: 500; font-size: .92rem; }
-  .more { margin-top: 10px; font-size: .88rem; color: var(--muted); }
-  .more summary { cursor: pointer; color: var(--accent); }
-  .more dl { margin-top: 8px; }
-  .seatbox { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .9rem; border: 1px solid var(--line); }
-  .seatbox b { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
-  .seatbox small { display: block; color: var(--muted); margin-top: 4px; font-size: .78rem; }
-  .seatbox.ok { background: var(--good-soft); border-color: #cfe8da; }
-  .seatbox.ok b { color: var(--good); }
-  .seatbox.tight { background: var(--warn-soft); border-color: #f3dcae; }
-  .seatbox.tight b { color: var(--warn); }
-  .seatbox.unknown { background: #f4f5f7; }
-  .seatbox.unknown b { color: var(--muted); }
-  .plan .seatline { font-size: .85rem; margin: 0 0 10px; color: var(--muted); }
-  .chips { margin-top: 10px; }
-  .chip { display: inline-block; font-size: .78rem; padding: 2px 9px; border-radius: 999px; margin: 4px 6px 0 0; background: var(--warn-soft); color: var(--warn); }
+  .leg h3 { margin:0; font-size:19px; color:var(--navy); }
+  .route { color:var(--muted); font-size:15px; margin:0 0 12px; }
+  .days { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .days button, .opts button { min-height:52px; background:#fff; color:var(--accent); border:1px solid #7A828C; transition:background .15s, border-color .15s; }
+  .days button:hover:not(:disabled), .opts button:hover:not(:disabled) { border-color:var(--navy); background:var(--navytint); }
+  .days button.on, .opts button.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .days button.on::before, .opts button.on::before, .plan.on .mark::before { content:""; flex:none; width:6px; height:11px; border:solid currentColor; border-width:0 2.5px 2.5px 0; transform:rotate(45deg) translate(-2px,-2px); }
+  .daynote { color:var(--accent); font-size:14px; font-weight:600; margin:0 0 12px; }
+  .daynote:empty { display:none; }
+  label { display:block; margin-bottom:6px; }
+  select { width:100%; font:inherit; color:var(--ink); background:#fff; border:1px solid #7A828C; border-radius:12px; padding:13px 40px 13px 14px; min-height:52px; appearance:none; -webkit-appearance:none; transition:border-color .15s, box-shadow .15s;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231F3556' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; }
+  .detail { margin-top:14px; background:var(--peach); border-left:5px solid var(--accent); border-radius:12px; padding:12px 16px; }
+  .detail.empty { background:var(--bg); border-left-color:var(--line); color:var(--muted); font-size:15px; }
+  .d-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .d-airline { font-weight:700; font-size:17px; color:var(--navy); }
+  .d-flight { color:var(--muted); font-size:14px; }
+  .d-airline { margin-top:2px; }
+  .price { color:var(--navy); font-size:34px; font-weight:700; line-height:1; margin:10px 0 4px; }
+  .price small { display:inline; margin-left:8px; }
+  .times { display:flex; align-items:center; gap:12px; margin:14px 0 12px; }
+  .t b { display:block; font-size:24px; font-weight:700; line-height:1.1; color:var(--navy); white-space:nowrap; }
+  .t b sup { font-size:12px; color:var(--accent); }
+  .t span { color:var(--muted); font-size:13px; }
+  .bar { flex:1; height:1px; background:#7A828C; position:relative; min-width:36px; }
+  .bar i { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--peach); padding:0 6px; font-style:normal; font-size:13px; color:var(--muted); white-space:nowrap; }
+  .seatrow { display:flex; gap:10px; align-items:flex-start; margin:4px 0 8px; font-size:14px; color:var(--muted); flex-wrap:wrap; }
+  .chips { margin:6px 0 4px; display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { display:inline-block; background:#fff; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:0 10px; font-size:13px; font-weight:700; letter-spacing:.03em; line-height:1.6; }
+  .more { margin-top:6px; border-top:1px solid #F3D9C2; }
+  .more summary { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; color:var(--accent); font-weight:600; }
+  .more summary:after, .faq summary:after { content:"+"; margin-left:auto; font-weight:700; font-size:20px; line-height:1; }
+  .more[open] summary:after, .faq details[open] summary:after { content:"\3"; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px 16px; margin:0 0 8px; }
+  .grid dt { color:var(--accent); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
+  .grid dd { margin:0; font-size:15px; }
 
   /* questions */
-  .q { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-  .q p { margin: 0 0 8px; font-weight: 600; font-size: .95rem; }
-  .q small { display: block; font-weight: 400; color: var(--muted); margin-top: 2px; }
-  .opts { display: flex; gap: 8px; flex-wrap: wrap; }
-  .opts button { background: #fff; color: var(--ink); border: 1px solid #cfd4dc; padding: 10px 14px; }
-  .opts button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .q p { margin:0 0 10px; font-weight:700; }
+  .q small { display:block; font-weight:400; color:var(--muted); font-size:14px; margin-top:2px; }
+  .opts { display:grid; grid-template-columns:repeat(auto-fit,minmax(84px,1fr)); gap:10px; }
+  .opt { font-weight:400; color:var(--muted); }
 
   /* faq */
-  .faq details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
-  .faq summary { cursor: pointer; font-weight: 600; font-size: .95rem; }
-  .faq p { margin: 8px 0 0; font-size: .92rem; color: var(--muted); }
+  .faq details { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:0 16px; margin:10px 0; }
+  .faq summary { display:flex; align-items:center; gap:8px; min-height:44px; padding:6px 0; cursor:pointer; color:var(--accent); font-weight:600; }
+  .faq details[open] summary { color:var(--navy); }
+  .faq p { margin:0 0 14px; font-size:15px; color:var(--muted); }
 
-  /* summary */
-  .summary { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
-  .summary ul { margin: 8px 0 12px; padding: 0; list-style: none; }
-  .summary li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .93rem; }
-  .summary li span:last-child { text-align: right; color: var(--muted); }
-  .total { display: flex; justify-content: space-between; font-weight: 700; padding: 10px 0 12px; }
-  textarea { width: 100%; font: inherit; border: 1px solid #cfd4dc; border-radius: 10px; padding: 12px; margin-bottom: 12px; min-height: 64px; resize: vertical; }
-  .send { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
-  .send a { text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 600; border-radius: 10px; padding: 12px 16px; }
-  .send a[aria-disabled="true"] { background: #c9d1e4; pointer-events: none; }
-  .status { color: var(--good); font-size: .88rem; min-height: 1.3em; margin: 8px 0 0; }
-  .foot { color: var(--muted); font-size: .8rem; margin-top: 12px; }
-  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } .send { grid-template-columns: 1fr; } }
+  /* send */
+  .total { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0 14px; border-top:1px solid var(--line); }
+  .total span:first-child { color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+  #sumTotal { color:var(--navy); font-size:34px; font-weight:700; line-height:1; }
+  .summary ul { margin:0; padding:0; list-style:none; }
+  .summary li { display:flex; flex-direction:column; gap:2px; padding:10px 0; border-bottom:1px solid var(--line); font-size:15px; }
+  .summary li b { color:var(--accent); font-size:13px; letter-spacing:.1em; text-transform:uppercase; }
+  .summary li:last-child { border-bottom:0; }
+  .summary li span { color:var(--ink); }
+  textarea { width:100%; font:inherit; color:var(--ink); background:#fff; border:1px solid #7A828C; border-radius:12px; padding:13px 14px; margin:0 0 14px; min-height:72px; resize:vertical; transition:border-color .15s, box-shadow .15s; }
+  textarea::placeholder { color:#5F6772; }
+  select:hover, textarea:hover { border-color:var(--navy); }
+  select:focus-visible, textarea:focus-visible { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(179,71,10,.25); }
+  .send { display:grid; gap:10px; }
+  .send [hidden], .ready[hidden], #steps [hidden], .gobar[hidden] { display:none !important; }
+
+  /* progress strip (borrowed from the team form: real state, three steps) */
+  .steps { list-style:none; margin:16px 0 0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .steps li { position:relative; padding-top:14px; font-size:14px; line-height:1.3; color:var(--muted); display:flex; flex-direction:column; gap:2px; }
+  .steps li::before { content:""; position:absolute; left:0; right:0; top:0; height:4px; border-radius:4px; background:var(--line); }
+  .steps li b { color:var(--ink); font-size:14px; font-weight:700; }
+  .steps li small { font-size:13px; color:var(--muted); }
+  .steps li.done::before { background:var(--navy); }
+  .steps li.now::before { background:var(--accent); }
+  .steps li.now b { color:var(--accent); }
+  .steps li.done small { color:var(--navy); font-weight:600; }
+  .stepnow { color:var(--muted); font-size:14px; margin:14px 0 0; }
+
+  /* plan tiles: whole card selects, with a radio-style mark */
+  .plan { cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+  .plan:hover { border-color:var(--navy); }
+  .mark { flex:none; width:30px; height:30px; border-radius:50%; border:2px solid #7A828C; background:#fff; display:flex; align-items:center; justify-content:center; color:#fff; }
+  .plan.on .mark { background:var(--navy); border-color:var(--navy); }
+  .plan button { min-height:52px; }
+
+  /* review and confirm */
+  .review h2 { margin-top:2px; }
+  .review .card { padding:16px; }
+  .summary li b { font-size:13px; }
+  .summary li { padding:12px 0; }
+  .ready { display:flex; gap:8px; align-items:flex-start; margin:0 0 14px; padding:10px 14px; border-radius:12px; background:var(--navytint); color:var(--navy); font-size:15px; font-weight:600; }
+  .ready.wait { background:var(--bg); color:var(--muted); font-weight:400; border:1px solid var(--line); }
+  .sent { text-align:center; background:var(--navytint); border:1px solid #C3D2E6; border-radius:16px; padding:22px 16px 18px; }
+  .sent .check { width:60px; height:60px; border-radius:50%; background:#fff; display:grid; place-items:center; margin:0 auto 14px; border:1px solid #C3D2E6; }
+  .sent .check svg { width:30px; height:30px; fill:none; stroke:var(--navy); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:30; stroke-dashoffset:30; }
+  .sent.show .check svg { animation:draw .5s ease .1s forwards; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .sent h3 { margin:0 0 6px; font-size:22px; line-height:1.2; color:var(--navy); }
+  .sent h3:focus { outline:none; }
+  .sent p { margin:6px 0; font-size:15px; }
+  .sent .honest { color:var(--muted); font-size:14px; }
+  .sent button { margin-top:10px; width:100%; }
+
+  /* fixed action bar on phones: total plus a jump to the review */
+  .gobar { position:fixed; left:0; right:0; bottom:0; z-index:6; background:rgba(255,255,255,.97); border-top:1px solid var(--line); box-shadow:0 -8px 24px rgba(31,35,40,.08); padding:10px 16px calc(10px + env(safe-area-inset-bottom)); }
+  .gobar .in { max-width:640px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+  .gobar .tot { flex:1; line-height:1.2; }
+  .gobar .tot span { display:block; color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .gobar .tot b { color:var(--navy); font-size:24px; }
+  .gobar button { min-height:52px; background:var(--accent); color:#fff; border-color:var(--accent); padding:0 20px; }
+  .gobar button:hover:not(:disabled) { background:#8F3908; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } .sent .check svg { stroke-dashoffset:0; } html { scroll-behavior:auto; } }
+  .status { color:var(--ok); font-size:15px; font-weight:600; min-height:1.3em; margin:8px 0 0; }
+  .foot { color:var(--muted); font-size:14px; margin:10px 0 0; }
+  @media (min-width:700px) { .send { grid-template-columns:1.4fr 1fr; } }
+  @media (max-width:420px) { .grid { grid-template-columns:1fr; } }
+
+  /* v7 additions */
+  .pill { white-space:normal; border-radius:14px; text-align:left; }
+  .rd { color:var(--muted); font-size:13px; margin:2px 0 0; }
+  .callout .chips { margin:8px 0 0; }
+  .faq .lead { margin-top:6px; }
+  .faq h3 { margin:10px 0 4px; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); }
+  .faq ul { margin:0 0 12px; padding-left:18px; font-size:15px; color:var(--muted); }
+  .faq li { margin:5px 0; overflow-wrap:anywhere; }
+  .faq li b { color:var(--ink); }
+  .faq table { width:100%; border-collapse:collapse; margin:0 0 12px; font-size:14px; color:var(--muted); }
+  .faq th, .faq td { text-align:left; vertical-align:top; padding:6px 8px 6px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+  .faq th { color:var(--accent); font-size:13px; letter-spacing:.06em; text-transform:uppercase; }
+  .faq a { color:var(--accent); font-weight:600; text-decoration:underline; }
+  .faq .ph { border:2px dashed var(--accent); border-radius:12px; padding:10px 14px; margin:0 0 14px; color:var(--ink); font-size:15px; }
+  .faq .ph ul { margin:6px 0 0; }
+  .grid dd { overflow-wrap:anywhere; }
+  .more[open] summary:after, .faq details[open] summary:after { content:"\2212"; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <h1>Hi Jeff, choose your flights</h1>
-  <p class="sub">Flights between San Diego and Boston for you and Alex (ClioCon, Oct 24–28). You are choosing for both of you. Prices are totals for two, as shown on Google Flights on Oct 8.</p>
+  <header>
+    <div class="top"><img class="logo" src="data:image/png;base64,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" alt="Tempello" width="118" height="28"><span class="event">ClioCon 2026 &middot; Oct 24&ndash;28</span></div>
+    <hr class="rule">
+    <div class="internal">Prices are the airlines&rsquo; own, read on their sites and shown with the time they were read. Fares can change; Luis confirms the final fare before booking.</div>
+    <div class="hero">
+      <span class="eyebrow">Hi Jeff</span>
+      <div class="h1row"><h1>Choose your flights</h1><svg class="star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="#F96706"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></g></svg></div>
+      <p class="sub">San Diego and Boston, for you and Alex. You are choosing for both. Prices are totals for two, as each airline showed them (read time on every flight).</p>
+      <ol class="steps" id="steps" aria-label="Your progress">
+        <li data-s="1"><b>1 Choose flights</b><small></small></li>
+        <li data-s="2"><b>2 Quick questions</b><small></small></li>
+        <li data-s="3"><b>3 Confirm</b><small></small></li>
+      </ol>
+      <p class="stepnow" id="stepnow" role="status"></p>
+    </div>
+  </header>
 
-  <div class="block">
-    <h2><span class="step">Start here</span>Pick a ready-made plan</h2>
-    <p class="lead">Each plan is a nonstop round trip. Seat selection is included unless noted. Tap a plan, then change any flight below if you like.</p>
+  <nav id="secnav" aria-label="Sections"><a href="#sec-plans">Plans</a><a href="#sec-build">Build your own</a><a href="#sec-faq">Answers</a><a href="#sec-send">Send</a></nav>
+
+  <section class="page" id="sec-plans">
+    <span class="eyebrow">Start here</span>
+    <h2>Pick a ready-made plan</h2>
+    <p class="lead">Nonstop round trips: one flight to Boston on Sat, Oct 24 and one flight home on Wed, Oct 28. Tap a plan, then change any flight below if you like.</p>
     <div class="plans" id="plans"></div>
-  </div>
+  </section>
 
-  <div class="block">
-    <h2><span class="step">Or</span>Build your own</h2>
-    <p class="lead">Each list is grouped by cabin, cheapest first.</p>
-    <section class="leg" id="leg-out">
-      <h2>Flight to Boston</h2>
-      <p class="route">San Diego (SAN) → Boston (BOS)</p>
+  <section class="page" id="sec-build">
+    <span class="eyebrow">Or</span>
+    <h2>Build your own</h2>
+    <p class="lead">Grouped by cabin, cheapest first. Seat numbers appear only where they have been verified against the airline seat map; they are a one-time snapshot and change without notice.</p>
+    <div class="card leg" id="leg-out">
+      <h3>Flight to Boston</h3>
+      <p class="route">San Diego (SAN) &rarr; Boston (BOS)</p>
       <div class="days" id="days"></div>
       <div class="daynote" id="daynote"></div>
-      <label for="sel-out">Choose a flight</label>
+      <label for="sel-out" class="micro">Choose a flight</label>
       <select id="sel-out"></select>
       <div class="detail empty" id="det-out">Choose a flight to see its details.</div>
-    </section>
-    <section class="leg" id="leg-ret">
-      <h2>Flight home (Wed, Oct 28)</h2>
-      <p class="route">Boston (BOS) → San Diego (SAN)</p>
-      <label for="sel-ret">Choose a flight</label>
+    </div>
+    <div class="card leg" id="leg-ret">
+      <h3>Flight home, Wed, Oct 28</h3>
+      <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+      <label for="sel-ret" class="micro">Choose a flight</label>
       <select id="sel-ret"></select>
       <div class="detail empty" id="det-ret">Choose a flight to see its details.</div>
-    </section>
-  </div>
+    </div>
 
-  <div class="block">
-    <h2><span class="step">Two quick questions</span></h2>
-    <div class="q" data-q="bags">
-      <p>How many checked bags each?<small>On economy fares the first checked bag is $45 each. The price of a second bag is not checked yet. Luis adds bags when booking.</small></p>
+    <h2>Two quick questions</h2>
+    <div class="card q" data-q="bags">
+      <p>How many checked bags each? <span class="opt">(optional)</span><small>Checked bags as the airlines showed them (1st / 2nd): Alaska $45 / $55, JetBlue $45 / $59, Delta $45 / $55, Southwest not read / not read. Luis adds bags when booking.</small></p>
       <div class="opts"><button type="button">None</button><button type="button">1 each</button><button type="button">2 each</button></div>
     </div>
-    <div class="q" data-q="seats">
-      <p>Seats: you on the aisle, Alex across the aisle from you?<small>Luis will request this when booking. An aisle seat is not guaranteed.</small></p>
+    <div class="card q" data-q="seats">
+      <p>Seats: you on the aisle, Alex across the aisle from you? <span class="opt">(optional)</span><small>Luis will request this. An aisle seat is not guaranteed.</small></p>
       <div class="opts"><button type="button">Yes</button><button type="button">Something else</button></div>
     </div>
-  </div>
+  </section>
 
-  <div class="block faq">
-    <h2>Before you send</h2>
-    <details><summary>What does the price include?</summary><p>Taxes and fees for both of you, as shown on Google Flights on Oct 8. Luis confirms the final price before booking.</p></details>
-    <details><summary>Should I decide soon?</summary><p>Prices can change. Google flagged some Oct 28 fares as likely to go up within a day. Alaska economy seats looked open on Oct 8. Delta seat maps were not checked, and JetBlue’s Oct 24 economy seats were nearly full.</p></details>
-    <details><summary>How many seats are open?</summary><p>On Oct 8, Alaska had about 100 of 178 seats open on every flight checked, with 14 to 32 side-by-side pairs in Main and aisle seats in about half of them. JetBlue Main on Oct 24 was nearly full (1 of 68 open). Delta and most of Southwest were not checked. Each flight card shows its own numbers. This is a one-time snapshot, not a hold on any seat.</p></details>
-    <details><summary>Can we sit together?</summary><p>Every economy and premium economy fare here includes free seat selection, so Luis can choose your seats when booking. An aisle seat is not guaranteed. First class is marked where seat selection is not confirmed.</p></details>
-    <details><summary>What about bags?</summary><p>One carry-on each is free. On economy fares the first checked bag is $45 each. Where checked, First class and Mint include two checked bags each. The price of a second bag was not checked.</p></details>
-    <details><summary>Can we change or cancel?</summary><p>Not checked yet. Google lists Alaska Main as changeable (a fare difference may apply) with no refunds. Luis will confirm each airline’s rules before booking.</p></details>
-    <details><summary>Why do some flights say “overnight”?</summary><p>Evening flights from San Diego land in Boston between 5:00 and 6:35 a.m. the next day. The hotel is booked from Saturday, Oct 24.</p></details>
-    <details><summary>What happens after I send?</summary><p>Luis checks that the prices and seats are still available, books both tickets, and sends you the confirmations. You do not pay or enter any details on this page.</p></details>
-  </div>
+  <section class="page faq" id="sec-faq">
+    <h2>Answers for you</h2>
+    <p class="lead">Everything here was read on the airline sites (Oct 8). Where a page did not show something, it says &ldquo;not read&rdquo;. This page does not give medical advice.</p>
+    <details><summary>Can Alex and I sit across the aisle from each other?</summary><p>Each flight card shows how many rows have both aisle seats open (aisle-aisle), but only where the seat map has been verified. Verified now: 29 of 32 flights. The others say &ldquo;read on the airline site, not yet verified&rdquo; and show no numbers.</p><ul><li>Sat Oct 24 Alaska AS 389 Main: 43 Main open, 3 aisle-aisle rows, last 6 seats</li><li>Sat Oct 24 Alaska AS 389 First: 8 of 16 First open, 1 aisle-aisle row, last 4 seats</li><li>Sat Oct 24 Alaska AS 255 Main: 34 Main open, 2 aisle-aisle rows</li><li>Sat Oct 24 Alaska AS 255 First: 10 of 16 First open, 2 aisle-aisle rows, last 5 seats</li><li>Sun Oct 25 Alaska AS 389 Main: 32 Main open, no aisle-aisle row</li><li>Sun Oct 25 Alaska AS 389 First: 4 of 16 First open, no aisle-aisle row, last 2 seats</li><li>Sun Oct 25 Alaska AS 255 Main: 41 Main open, 4 aisle-aisle rows</li><li>Sun Oct 25 Alaska AS 255 First: 13 of 16 First open, 2 aisle-aisle rows</li><li>Wed Oct 28 Alaska AS 256 Main: 56 Main open, 4 aisle-aisle rows</li><li>Wed Oct 28 Alaska AS 256 First: 9 of 16 First open, 1 aisle-aisle row, last 3 seats</li><li>Wed Oct 28 Alaska AS 389 Main: 56 Main open, 6 aisle-aisle rows</li><li>Wed Oct 28 Alaska AS 389 First: 4 of 16 First open, no aisle-aisle row, last 4 seats</li><li>Sat Oct 24 JetBlue B6 2120 Main: 1 Main open, no aisle-aisle row</li><li>Sat Oct 24 JetBlue B6 2120 Even More: 16 of 30 Even More open, 1 aisle-aisle row</li><li>Sat Oct 24 JetBlue B6 2120 Mint: 2 of 16 Mint open, 1 aisle-aisle row, 2 left at this price</li><li>Sat Oct 24 JetBlue B6 220 Main: 0 Main open, no aisle-aisle row</li><li>Sat Oct 24 JetBlue B6 220 Even More: 10 of 30 Even More open, no aisle-aisle row</li><li>Sat Oct 24 JetBlue B6 220 Mint: 2 of 16 Mint open, no aisle-aisle row, 3 left at this price</li><li>Sun Oct 25 JetBlue B6 2120 Main: 9 Main open, no aisle-aisle row</li><li>Sun Oct 25 JetBlue B6 220 Main: 3 Main open, no aisle-aisle row, 3 left at this price</li><li>Sun Oct 25 JetBlue B6 620 Main: 0 Main open, no aisle-aisle row</li><li>Wed Oct 28 JetBlue B6 619 Main: 46 Main open, 7 aisle-aisle rows</li><li>Wed Oct 28 JetBlue B6 219 Main: 7 Main open, no aisle-aisle row</li><li>Wed Oct 28 JetBlue B6 319 Main: 29 Main open, 3 aisle-aisle rows</li><li>Wed Oct 28 Delta DL 571 Main: 70 Main open, 10 aisle-aisle rows</li><li>Sat Oct 24 Delta DL 571 Main: 75 Main open, 10 aisle-aisle rows</li><li>Sun Oct 25 Delta DL 571 Main: 63 Main open, 6 aisle-aisle rows</li><li>Sat Oct 24 Delta DL 571 First: 10 of 20 First open, no aisle-aisle row, 4 left at this price</li><li>Sun Oct 25 Delta DL 571 First: 14 of 20 First open, 2 aisle-aisle rows, 3 left at this price</li></ul><p>Southwest says its seat map may not show all reserved seats.</p></details>
+    <details><summary>Does choosing seats cost extra?</summary><p>As each airline showed it on its fare comparison:</p><ul><li><b>Alaska Main:</b> Compare fares, Main: &quot;Seat selection in Main cabin&quot; (no price shown). Fees page: Main Preferred paid upgrades &quot;Starting at $9 USD&quot;; Premium Class paid upgrades &quot;Starting at $15 USD&quot;. Exact seat price for this flight not read (seat map is preview only).</li><li><b>Alaska First:</b> Compare fares, First/Business: &quot;Seat selection in First Class cabin&quot; (no price shown).</li><li><b>JetBlue Main:</b> Main: &quot;Free seat selection&quot; (Main Base: &quot;No free seat selection&quot;). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map).</li><li><b>JetBlue Even More:</b> EvenMore: &quot;Free seat selection&quot; (EvenMore Base: &quot;No seat selection (auto-assigned)&quot;). Price of paid seats not read.</li><li><b>JetBlue Mint:</b> Mint cards list no seat-selection line (fare card: lie-flat seats &amp; suites, priority check-in, Group 1). Seat price not read.</li><li><b>Delta Main:</b> Seat map panel, Main: &quot;Select your seat in advance for more peace of mind and manage your trip easily without change fees for flights originating in United States, Canada, and the Caribbean&quot;. Delta Main (Classic) includes advance seat selection; Delta Main Basic (hidden unless Include Basic is ticked, price not read) is the fare without it. No separate per-seat price is shown on the view-only map (the panel lists each cabin fare as &quot;Additional Amount&quot;), so a seat fee is not read. Comfort seats are sold as the Comfort fare, First seats as the First fare.</li><li><b>Delta First:</b> Seat map panel lists First &quot;Additional Amount&quot; equal to the First fare; seat choice is part of the First fare. No separate per-seat price shown (view-only map), so a seat fee is not read.</li><li><b>Southwest Choice:</b> Fare benefits: Choice = &quot;Standard (select at booking)&quot; so a Standard seat can be chosen at booking on Choice; Basic = &quot;Standard (assigned at check-in)&quot;. Preferred seat &quot;$&quot; and Extra Legroom seat &quot;$&quot; on Choice (amounts not read); Standard seat ticked. Southwest help-centre banner: &quot;All Southwest flights now have assigned seats! Learn more.&quot; Results row labels: Basic &quot;Seat assigned at check-in&quot;, Choice &quot;Standard seat included&quot;, Choice Preferred &quot;Preferred seat included&quot;, Choice Extra &quot;Extra Legroom seat included&quot;.</li></ul></details>
+    <details><summary>What do we pay in total, with bags?</summary><p>Prices on this page are the airline&rsquo;s price per person times 2, as the airline showed it. Checked-bag fees as read:</p><table><thead><tr><th>Airline and fare</th><th>1st bag</th><th>2nd bag</th></tr></thead><tbody><tr><td>Alaska Main</td><td>$45</td><td>$55</td></tr><tr><td>Alaska First</td><td>Free</td><td>not read</td></tr><tr><td>JetBlue Main, Even More</td><td>$45</td><td>$59</td></tr><tr><td>JetBlue Mint</td><td>Included</td><td>Included</td></tr><tr><td>Delta Main</td><td>$45</td><td>$55</td></tr><tr><td>Delta First</td><td>not read</td><td>not read</td></tr><tr><td>Southwest Choice</td><td>not read</td><td>not read</td></tr></tbody></table><p>Bag wording as read:</p><ul><li><b>Alaska Main:</b> Compare fares, Main: no bag line. Checked-bag page: Main Cabin and Saver guests in North America 1st bag $45 USD, 2nd bag $55 USD, up to 50 lbs and 62 linear inches. Results page: &quot;Baggage fees may apply.&quot;</li><li><b>Alaska First:</b> Compare fares, First/Business: &quot;Free bags&quot; (number of bags and weight not read)</li><li><b>JetBlue Main:</b> No checked bag included on Main Base/Main/Main Flex (Our Fares). Checked bag page, Main Base/Main/Main Flex rows, first fee column (more than 24 h before, off-peak): 1st $45, 2nd $59; next column shows $49 / $69. Oct 24-28 not in the page peak dates (peak listed Oct 10-14).</li><li><b>JetBlue Even More:</b> No checked bag included (Our Fares lists Main tiers only). Checked bag page, EvenMore rows, first column (more than 24 h before, off-peak): 1st $45, 2nd $59; next column $49 / $69.</li><li><b>JetBlue Mint:</b> Mint card: &quot;2 checked bags included&quot;. Checked bag page: Mint/Mint Flex 1st and 2nd bag included (up to 70 lbs).</li><li><b>Delta Main:</b> Delta fees page (Delta Comfort and Delta Main, domestic, no Amex/Medallion): first checked bag $45 USD, second $55 USD, each way, under 50 lbs and 62 in total. One carry-on bag and one personal item included.</li><li><b>Delta First:</b> First and second checked bag fees for Delta First not read (the fees page states its $45/$55 figures for Delta Comfort and Delta Main only).</li><li><b>Southwest Choice:</b> Fare benefits: Checked bag shows &quot;$&quot; for Basic, Choice and Choice Preferred; &quot;2 free&quot; for Choice Extra. Amounts not read. Checked-bag policy page: limits up to 50 pounds, 62 inches (length+width+height); &quot;Checked baggage fees apply.&quot;</li></ul></details>
+    <details><summary>What is included?</summary><h3>Carry-on</h3><ul><li><b>Alaska Main, Alaska First:</b> not read (not in Compare fares)</li><li><b>JetBlue Main:</b> Carry-on bag included; personal item included (all Main fares)</li><li><b>JetBlue Even More:</b> Carry-on bag included; &quot;Dedicated bin space for your free carry-on bag&quot;</li><li><b>JetBlue Mint:</b> not read on Mint card (Our Fares page: carry-on included on Main fares)</li><li><b>Delta Main:</b> Compare Our Products, Main: &quot;One carry-on bag and one personal item&quot;</li><li><b>Delta First:</b> Compare Our Products, First: &quot;Dedicated overhead bin space&quot; (carry-on count for First not separately worded)</li><li><b>Southwest Choice:</b> not read (not in Fare benefits)</li></ul><h3>Meals</h3><ul><li><b>Alaska Main:</b> not read for Main (Compare fares lists meals only for First: &quot;Free meals and snacks&quot;)</li><li><b>Alaska First:</b> Compare fares, First/Business: &quot;Free meals and snacks&quot;; &quot;Free beer, wine, and cocktails&quot;</li><li><b>JetBlue Main:</b> Main page: free brand-name snacks + drinks, incl. freshly brewed Dunkin coffee (alcohol and EatUp menus for purchase)</li><li><b>JetBlue Even More:</b> &quot;Free alcoholic drinks &amp; premium snack*&quot; (* max 3 free alcoholic drinks per flight, 21+; not on flights under 250 miles)</li><li><b>JetBlue Mint:</b> Mint card: &quot;Curated small plates menu&quot;</li><li><b>Delta Main:</b> Compare Our Products, Main: &quot;Snacks and non-alcoholic beverages on flights over 350 miles&quot;</li><li><b>Delta First:</b> Compare Our Products, First: &quot;Premium dining on most flights over 900 miles (and select markets)&quot;; First details: &quot;Premium meals on flights over 900 miles and personalized flight attendant service&quot; (flight is 2581 miles)</li><li><b>Southwest Choice:</b> Flight information flyout (WN 4440): &quot;Snacks &amp; drinks provided*&quot;; Fare benefits: Premium drink &quot;$&quot; on Choice (on select flights 251 or more miles).</li></ul><h3>Power</h3><ul><li><b>Alaska Main, Alaska First:</b> Flight details amenities: &quot;In-seat power source&quot;</li><li><b>JetBlue Main, JetBlue Even More, JetBlue Mint:</b> Seat map panel: &quot;in-seat power&quot; (A321). Main page: &quot;power ports at every seat (or every row, depending on aircraft)&quot;.</li><li><b>Delta Main:</b> Flight Details icon strip shows icons without text labels; text for Main power not read</li><li><b>Delta First:</b> First details: &quot;110-volt outlets at every seat, including USB ports&quot;</li><li><b>Southwest Choice:</b> not read</li></ul><h3>Wi-Fi</h3><ul><li><b>Alaska Main, Alaska First:</b> Flight details amenities: &quot;Wi-Fi&quot; (price not read). Results page: &quot;Inflight Wi-Fi availability is subject to change without notice.&quot;</li><li><b>JetBlue Main, JetBlue Even More, JetBlue Mint:</b> Flight Amenities tab: &quot;free wi-fi, free live TV &amp; movies&quot;; Main page: free Fly-Fi for everyone</li><li><b>Delta Main, Delta First:</b> Results card tag: &quot;Free Wi-Fi for SkyMiles Members&quot; (price for non-members not read)</li><li><b>Southwest Choice:</b> Fare benefits: Inflight WiFi &quot;$&quot; on Choice (Free for Rapid Rewards Members). Flyout: &quot;Free Wifi &amp; Texting for Rapid Rewards Members thanks to T-Mobile&quot;. Price not read.</li></ul><h3>Boarding</h3><ul><li><b>Alaska Main:</b> Compare fares, Main: &quot;General boarding&quot;</li><li><b>Alaska First:</b> Compare fares, First/Business: &quot;Priority boarding&quot;</li><li><b>JetBlue Main:</b> Main: &quot;Board in Groups 4-7&quot; (Main Base: Group 8, last; Main Flex: Group 3, early boarding)</li><li><b>JetBlue Even More:</b> EvenMore: &quot;Board in Group 2 (early boarding)&quot;</li><li><b>JetBlue Mint:</b> Mint: &quot;Priority check-in &amp; board in Group 1&quot;</li><li><b>Delta Main:</b> Compare Our Products, Main: &quot;Board in Zones 5-8&quot;</li><li><b>Delta First:</b> Compare Our Products, First: &quot;Board first in Zone 1&quot;; First details: &quot;Sky Priority check-in and security access where available&quot;</li><li><b>Southwest Choice:</b> Fare benefits, Choice: Boarding group &quot;General&quot; (Basic &quot;Last&quot;; Choice Preferred &quot;Early General (Groups 3-4)&quot;; Choice Extra &quot;Early (Group 1)&quot;). Priority Boarding &quot;$&quot;.</li></ul><h3>Legroom</h3><ul><li><b>Alaska Main, Alaska First:</b> not read</li><li><b>JetBlue Main, JetBlue Even More, JetBlue Mint:</b> not read (JetBlue pages show only &quot;Extra legroom&quot; for EvenMore and &quot;most legroom in coach&quot;; no inches)</li><li><b>Delta Main:</b> not read (Delta pages show no seat pitch in inches for Main or Comfort)</li><li><b>Delta First:</b> not read as pitch; Delta First Features text: &quot;up to 8 inches extra legroom compared to a standard Delta Main seat, and up to 5.4-inch recline&quot;</li><li><b>Southwest Choice:</b> not read (Southwest pages show no inches)</li></ul></details>
+    <details><summary>Can we change or cancel?</summary><p>Quoted as the airline showed it.</p><h3>Change</h3><ul><li><b>Alaska Main:</b> Compare fares, Main: &quot;No flight change fees&quot;. Fees page: &quot;Change/cancellation fee: Free ... Fare differences may apply.&quot;</li><li><b>Alaska First:</b> Compare fares, First/Business: &quot;No flight change fees&quot;. Fees page: &quot;Change/cancellation fee: Free ... Fare differences may apply.&quot;</li><li><b>JetBlue Main:</b> Main: &quot;No change or cancel fees&quot;. Main Base: &quot;Change &amp; cancel fee&quot;. Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main.</li><li><b>JetBlue Even More:</b> EvenMore: &quot;No change or cancel fee&quot;; EvenMore Base: &quot;Change &amp; cancel fee&quot;; EvenMore Flex: no change or cancel fees, refundable, free same day switch / standby</li><li><b>JetBlue Mint:</b> Mint: &quot;No change or cancel fee&quot; (Mint Flex adds refund and same day switch / standby)</li><li><b>Delta Main:</b> Seat map panel, Main: &quot;without change fees for flights originating in United States, Canada, and the Caribbean&quot;. Delta fees page: &quot;There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada&quot; (Delta Main Basic: $99).</li><li><b>Delta First:</b> Delta fees page: &quot;There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada&quot; (Delta First Basic: $300). Fare read is the non-Basic First fare (Include Basic was not ticked).</li><li><b>Southwest Choice:</b> Fare benefits, Choice: Changes &quot;Fare difference may apply&quot;; &quot;Free same-day change/standby (taxes and fees may apply)&quot; is ticked. Basic: &quot;Available with fare upgrade&quot;.</li></ul><h3>Cancel</h3><ul><li><b>Alaska Main, Alaska First:</b> Fees page footnote: &quot;Our 24-hour cancellation and same-day confirmed policies apply&quot;. Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read.</li><li><b>JetBlue Main:</b> Our Fares: Main = &quot;Travel credit&quot;; Main Base = &quot;Travel credit minus fee&quot;; Main Flex = &quot;Refund to original payment&quot; (card shows &quot;Refundable to original form of payment&quot;)</li><li><b>JetBlue Even More:</b> EvenMore Flex: &quot;Refundable to original form of payment&quot;; EvenMore and EvenMore Base cancellation wording not read on the card (Our Fares page lists Main fares only)</li><li><b>JetBlue Mint:</b> Mint card: &quot;No change or cancel fee&quot;; Mint Flex: &quot;Refundable to original form of payment&quot;</li><li><b>Delta Main, Delta First:</b> Delta fees page, change/cancel table (US to US): &quot;Classic tickets: free&quot;; and &quot;If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference&quot;. Refund-to-card versus eCredit wording for a cancellation not read.</li><li><b>Southwest Choice:</b> Fare benefits, Choice: &quot;No cancel fees&quot; ticked; Refundability &quot;Transferable Flight Credit&quot; (Basic: &quot;Non-transferable flight credit&quot;); flight credit expiration 12 mos (Basic 6 mos). Cash refund wording not read.</li></ul></details>
+    <details><summary>Are these flights usually on time?</summary><p>As the airline showed it on the flight details page.</p><ul><li><b>Sat Oct 24, SAN 8:15 AM, Alaska AS 389:</b> Alaska flight details &quot;Flight Performance&quot;: 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)</li><li><b>Sat Oct 24, SAN 8:34 PM, Alaska AS 255:</b> Alaska flight details &quot;Flight Performance&quot;: 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)</li><li><b>Sun Oct 25, SAN 8:15 AM, Alaska AS 389:</b> Alaska flight details &quot;Flight Performance&quot;: 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)</li><li><b>Sun Oct 25, SAN 8:41 PM, Alaska AS 255:</b> Alaska flight details &quot;Flight Performance&quot;: 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)</li><li><b>Wed Oct 28, BOS 7:51 AM, Alaska AS 256:</b> Alaska flight details &quot;Flight Performance&quot;: 92% on-time, 0% late 30+ min, 7% canceled (BOS to SAN, previous month)</li><li><b>Wed Oct 28, BOS 6:14 PM, Alaska AS 389:</b> Alaska flight details &quot;Flight Performance&quot;: 37% on-time, 62% late 30+ min, 0% canceled (BOS to SAN, previous month)</li><li><b>Sat Oct 24, SAN 8:20 PM, JetBlue B6 2120:</b> JetBlue flight details &quot;Amenities &amp; Performance&quot;: On-time arrival 74%, delayed 30+ min 22%, cancelled 4%</li><li><b>Sat Oct 24, SAN 2:45 PM, JetBlue B6 220:</b> not read</li><li><b>Sun Oct 25, SAN 8:26 PM, JetBlue B6 2120:</b> On-time arrival 74%, delayed 30+ min 22%, cancelled 4% (JetBlue Amenities &amp; Performance tab)</li><li><b>Sun Oct 25, SAN 2:07 PM, JetBlue B6 220:</b> not read</li><li><b>Sun Oct 25, SAN 11:41 AM, JetBlue B6 620:</b> not read</li><li><b>Wed Oct 28, BOS 7:00 AM, JetBlue B6 619:</b> not read</li><li><b>Wed Oct 28, BOS 9:30 AM, JetBlue B6 219:</b> JetBlue Amenities &amp; Performance: On-time arrival 80%, delayed 30+ min 0%, cancelled 0%</li><li><b>Wed Oct 28, BOS 3:50 PM, JetBlue B6 319:</b> JetBlue Amenities &amp; Performance: On-time arrival 64%, delayed 30+ min 25%, cancelled 4%</li><li><b>Wed Oct 28, BOS 5:10 PM, Delta DL 571:</b> Delta flight details &quot;DL571 Flight Performance&quot; (preceding month): On Time 58%, +30 mins 26%, +60 mins N/A, Cancelled N/A</li><li><b>Sat Oct 24, SAN 9:53 PM, Delta DL 571:</b> Delta flight details &quot;DL571 Flight Performance&quot; (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A</li><li><b>Sun Oct 25, SAN 9:53 PM, Delta DL 571:</b> Delta flight details &quot;DL571 Flight Performance&quot; (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A</li><li><b>Sat Oct 24, SAN 11:40 AM, Southwest WN 4440:</b> Flight information flyout WN 4440: % Ontime arrival N/A, % &gt; 30 min late N/A, % Cancellation N/A, Average delay time N/A</li><li><b>Sun Oct 25, SAN 3:00 PM, Southwest WN 765:</b> not read</li><li><b>Wed Oct 28, BOS 10:35 AM, Southwest WN 4382:</b> not read</li></ul></details>
+    <details><summary>Will we make the event days?</summary><p>Hotel is booked from Saturday, Oct 24. The partner summit is Sunday, noon to 5 p.m.; every Sunday flight lands after it starts (the earliest lands 5:07 PM, after it ends).</p><p>Evening flights from San Diego that land the next day arrive between 5:00 AM and 6:35 AM.</p><p>Hotel check-in time: not known. Luis will confirm it.</p></details>
+    <details><summary>Could seats disappear if I wait?</summary><p>Seat maps change without notice. Each flight shows when it was read.</p><ul><li>Sat Oct 24 Alaska AS 389 Main: 43 Main open, 3 aisle-aisle rows, last 6 seats (Read on airline site, Oct 8, 1:43 PM ET)</li><li>Sat Oct 24 Alaska AS 389 First: 8 of 16 First open, 1 aisle-aisle row, last 4 seats (Read on airline site, Oct 8, 1:43 PM ET)</li><li>Sat Oct 24 Alaska AS 255 First: 10 of 16 First open, 2 aisle-aisle rows, last 5 seats (Read on airline site, Oct 8, 1:49 PM ET)</li><li>Sun Oct 25 Alaska AS 389 First: 4 of 16 First open, no aisle-aisle row, last 2 seats (Read on airline site, Oct 8, 1:50 PM ET)</li><li>Wed Oct 28 Alaska AS 256 First: 9 of 16 First open, 1 aisle-aisle row, last 3 seats (Read on airline site, Oct 8, 1:53 PM ET)</li><li>Wed Oct 28 Alaska AS 389 First: 4 of 16 First open, no aisle-aisle row, last 4 seats (Read on airline site, Oct 8, 1:54 PM ET)</li><li>Sat Oct 24 JetBlue B6 2120 Mint: 2 of 16 Mint open, 1 aisle-aisle row, 2 left at this price (Read on airline site, Oct 8, 2:20 PM ET)</li><li>Sat Oct 24 JetBlue B6 220 Mint: 2 of 16 Mint open, no aisle-aisle row, 3 left at this price (Read on airline site, Oct 8, 2:20 PM ET)</li><li>Sun Oct 25 JetBlue B6 220 Main: 3 Main open, no aisle-aisle row, 3 left at this price (Read on airline site, Oct 8, 2:20 PM ET)</li><li>Sat Oct 24 Delta DL 571 First: 10 of 20 First open, no aisle-aisle row, 4 left at this price (Read on airline site, Oct 8, 2:33 PM ET)</li><li>Sun Oct 25 Delta DL 571 First: 14 of 20 First open, 2 aisle-aisle rows, 3 left at this price (Read on airline site, Oct 8, 2:38 PM ET)</li></ul></details>
+    <details><summary>Can I get help or a special seat?</summary><p>Each airline has its own assistance page. Luis can call the airline to arrange special assistance.</p><ul><li><b>Alaska:</b> <a href="https://www.alaskaair.com/content/travel-info/accessible-services/airport-accessibility" target="_blank" rel="noopener">Assistance page</a></li><li><b>JetBlue:</b> <a href="https://www.jetblue.com/at-the-airport/accessibility-assistance" target="_blank" rel="noopener">Assistance page</a></li><li><b>Delta:</b> <a href="https://www.delta.com/us/en/accessible-travel-services/overview" target="_blank" rel="noopener">Assistance page</a></li><li><b>Southwest:</b> no assistance page link was read</li></ul></details>
+    <details><summary>What does Luis need from me to book?</summary><div class="ph"><b>Luis will confirm this list.</b><ul><li>Luis will confirm this list.</li></ul></div></details>
+    <details><summary>Why these plans?</summary><p>Plans and tags are worked out from the airline readings only: the lowest price among economy options of that day, no overnight, the most aisle-aisle rows (verified only), and whether the fare includes seat choice. They are not advice.</p></details>
+    <details><summary>What happens after I send?</summary><p>Luis checks that the prices and seats are still available, books both tickets, and sends you the confirmations. You do not pay or enter any details here.</p></details>
+  </section>
 
-  <div class="summary">
-    <h2>Your choices</h2>
-    <ul id="sumList"></ul>
-    <div class="total"><span>Total for both</span><span id="sumTotal">$0</span></div>
-    <label for="note">Note for Luis (optional)</label>
-    <textarea id="note" placeholder="Anything else Luis should know"></textarea>
-    <div class="send">
-      <button id="send" type="button" disabled>Confirm my choices</button>
-      <button id="copy" type="button" class="ghost" disabled>Copy my choices</button>
+  <section class="page summary review" id="sec-send">
+    <span class="eyebrow">Step 3</span>
+    <h2>Review and confirm</h2>
+    <div class="card">
+      <ul id="sumList"></ul>
+      <div class="total"><span>Total for both</span><span id="sumTotal">$0</span></div>
+      <label for="note" class="micro">Note for Luis <span class="opt" style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
+      <textarea id="note" placeholder="Anything else Luis should know"></textarea>
+      <p class="ready wait" id="ready"></p>
+      <div class="send">
+        <div class="sent" id="sent" hidden>
+          <div class="check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <h3 id="sentTitle" tabindex="-1">Sent to Luis. Thank you.</h3>
+          <p>He will confirm with you before booking anything. Changed your mind? Change any choice above and confirm again; he will use the latest.</p>
+          <p class="honest">This page cannot confirm that your message arrived. If you do not hear back, tap Copy my choices and message him.</p>
+          <button type="button" id="again">Make a change</button>
+        </div>
+        <button id="send" type="button" class="primary" disabled><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bt"><strong>Confirm my choices</strong><small>Sends your choices to Luis</small></span></button>
+        <button id="copy" type="button" class="ghost" disabled><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>Copy my choices</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="foot">Choose both flights to turn on the buttons. Nothing is booked until Luis books it. To change your mind, confirm again and Luis will use the latest.</p>
     </div>
-    <p class="status" id="status" role="status"></p>
-    <p class="foot">Choose both flights to turn on these buttons. Confirming sends your choices to Luis. Nothing is booked until Luis books it. To change your mind, confirm again and Luis will use the latest.</p>
-  </div>
+  </section>
 </div>
 
+<div class="gobar" id="gobar" hidden><div class="in"><div class="tot"><span>Total for both</span><b id="goTotal">$0</b></div><button type="button" id="jump">Review and confirm</button></div></div>
+
 <script>
-const FLIGHTS = [
- {
-  "id": "F01",
-  "leg": "sat24",
-  "airline": "Alaska",
-  "flight": "AS 255",
-  "dep": "8:34 PM",
-  "arr": "5:21 AM",
-  "nextDay": 1,
-  "dur": "5h 47m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 411,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F02",
-  "leg": "sat24",
-  "airline": "Delta",
-  "flight": "DL 571",
-  "dep": "9:53 PM",
-  "arr": "6:35 AM",
-  "nextDay": 1,
-  "dur": "5h 42m",
-  "cabin": "Economy",
-  "fare": "Main Classic",
-  "price": 407,
-  "aircraft": "Airbus A321neo",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F03",
-  "leg": "sat24",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "8:15 AM",
-  "arr": "5:07 PM",
-  "nextDay": 0,
-  "dur": "5h 52m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 521,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F04",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 2120",
-  "dep": "8:20 PM",
-  "arr": "5:26 AM",
-  "nextDay": 1,
-  "dur": "6h 06m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 507,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F05",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 2120",
-  "dep": "8:20 PM",
-  "arr": "5:26 AM",
-  "nextDay": 1,
-  "dur": "6h 06m",
-  "cabin": "Premium Economy",
-  "fare": "Even More",
-  "price": 925,
-  "aircraft": "Airbus A320",
-  "legroom": "37 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F06",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 220",
-  "dep": "2:45 PM",
-  "arr": "11:57 PM",
-  "nextDay": 0,
-  "dur": "6h 12m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 727,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "Often delayed 30+ min",
-  "rise": 0
- },
- {
-  "id": "F07",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 220",
-  "dep": "2:45 PM",
-  "arr": "11:57 PM",
-  "nextDay": 0,
-  "dur": "6h 12m",
-  "cabin": "Premium Economy",
-  "fare": "Even More",
-  "price": 1145,
-  "aircraft": "Airbus A320",
-  "legroom": "37 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "Often delayed 30+ min",
-  "rise": 0
- },
- {
-  "id": "N1",
-  "leg": "sat24",
-  "airline": "Southwest",
-  "flight": "WN 4440",
-  "dep": "11:40 AM",
-  "arr": "8:15 PM",
-  "nextDay": 0,
-  "dur": "5h 35m",
-  "cabin": "Economy",
-  "fare": "Choice",
-  "price": 507,
-  "aircraft": "Boeing 737-700",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "No outlets listed",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F08",
-  "leg": "sun25",
-  "airline": "Alaska",
-  "flight": "AS 255",
-  "dep": "8:41 PM",
-  "arr": "5:28 AM",
-  "nextDay": 1,
-  "dur": "5h 47m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 567,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F09",
-  "leg": "sun25",
-  "airline": "Delta",
-  "flight": "DL 571",
-  "dep": "9:53 PM",
-  "arr": "6:35 AM",
-  "nextDay": 1,
-  "dur": "5h 42m",
-  "cabin": "Economy",
-  "fare": "Main Classic",
-  "price": 547,
-  "aircraft": "Airbus A321neo",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F10",
-  "leg": "sun25",
-  "airline": "JetBlue",
-  "flight": "B6 2120",
-  "dep": "8:26 PM",
-  "arr": "5:00 AM",
-  "nextDay": 1,
-  "dur": "5h 34m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 593,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F11",
-  "leg": "sun25",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "8:15 AM",
-  "arr": "5:07 PM",
-  "nextDay": 0,
-  "dur": "5h 52m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 761,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F12",
-  "leg": "sun25",
-  "airline": "Southwest",
-  "flight": "WN 765",
-  "dep": "3:00 PM",
-  "arr": "11:35 PM",
-  "nextDay": 0,
-  "dur": "5h 35m",
-  "cabin": "Economy",
-  "fare": "Choice",
-  "price": 777,
-  "aircraft": "Boeing 737 MAX 8",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "USB outlet only",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F13",
-  "leg": "sun25",
-  "airline": "JetBlue",
-  "flight": "B6 220",
-  "dep": "2:07 PM",
-  "arr": "11:00 PM",
-  "nextDay": 0,
-  "dur": "5h 53m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 860,
-  "aircraft": "Airbus A320",
-  "legroom": "32 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "Often delayed 30+ min",
-  "rise": 0
- },
- {
-  "id": "F14",
-  "leg": "sun25",
-  "airline": "JetBlue",
-  "flight": "B6 620",
-  "dep": "11:41 AM",
-  "arr": "8:29 PM",
-  "nextDay": 0,
-  "dur": "5h 48m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 1312,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "Often delayed 30+ min",
-  "rise": 0
- },
- {
-  "id": "F15",
-  "leg": "wed28",
-  "airline": "Delta",
-  "flight": "DL 571",
-  "dep": "5:10 PM",
-  "arr": "8:28 PM",
-  "nextDay": 0,
-  "dur": "6h 18m",
-  "cabin": "Economy",
-  "fare": "Main Classic",
-  "price": 367,
-  "aircraft": "Airbus A321neo",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "Often delayed 30+ min",
-  "rise": 1
- },
- {
-  "id": "F16",
-  "leg": "wed28",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "6:14 PM",
-  "arr": "9:35 PM",
-  "nextDay": 0,
-  "dur": "6h 21m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 309,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F17",
-  "leg": "wed28",
-  "airline": "Alaska",
-  "flight": "AS 256",
-  "dep": "7:51 AM",
-  "arr": "11:09 AM",
-  "nextDay": 0,
-  "dur": "6h 18m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 309,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "31 in",
-  "wifi": "Wi-Fi for a fee",
-  "power": "Power & USB",
-  "delay": "",
-  "rise": 0
- },
- {
-  "id": "F18",
-  "leg": "wed28",
-  "airline": "JetBlue",
-  "flight": "B6 619",
-  "dep": "7:00 AM",
-  "arr": "10:31 AM",
-  "nextDay": 0,
-  "dur": "6h 31m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 411,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 1
- },
- {
-  "id": "F19",
-  "leg": "wed28",
-  "airline": "JetBlue",
-  "flight": "B6 219",
-  "dep": "9:30 AM",
-  "arr": "12:56 PM",
-  "nextDay": 0,
-  "dur": "6h 26m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 411,
-  "aircraft": "Airbus A320",
-  "legroom": "32 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 1
- },
- {
-  "id": "F20",
-  "leg": "wed28",
-  "airline": "Southwest",
-  "flight": "WN 4382",
-  "dep": "10:35 AM",
-  "arr": "1:50 PM",
-  "nextDay": 0,
-  "dur": "6h 15m",
-  "cabin": "Economy",
-  "fare": "Choice",
-  "price": 383,
-  "aircraft": "Boeing 737",
-  "legroom": "31 in",
-  "wifi": "Free Wi-Fi",
-  "power": "USB outlet only",
-  "delay": "",
-  "rise": 1
- },
- {
-  "id": "N2",
-  "leg": "wed28",
-  "airline": "JetBlue",
-  "flight": "B6 319",
-  "dep": "3:50 PM",
-  "arr": "7:14 PM",
-  "nextDay": 0,
-  "dur": "6h 24m",
-  "cabin": "Economy",
-  "fare": "Main",
-  "price": 411,
-  "aircraft": "Airbus A320",
-  "legroom": "33 in",
-  "wifi": "Free Wi-Fi",
-  "power": "Power, USB & live TV",
-  "delay": "",
-  "rise": 1
- },
- {
-  "id": "P01",
-  "leg": "sat24",
-  "airline": "Alaska",
-  "flight": "AS 255",
-  "dep": "8:34 PM",
-  "arr": "5:21 AM",
-  "nextDay": 1,
-  "dur": "5h 47m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 1567,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Premium seat; seat selection not confirmed",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Free meal service, lounge access",
-  "note": "Legroom in inches not shown by Google"
- },
- {
-  "id": "P02",
-  "leg": "sat24",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "8:15 AM",
-  "arr": "5:07 PM",
-  "nextDay": 0,
-  "dur": "5h 52m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 2437,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Premium seat; seat selection not confirmed",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Free meal service, lounge access",
-  "note": ""
- },
- {
-  "id": "P03",
-  "leg": "sat24",
-  "airline": "Delta",
-  "flight": "DL 571",
-  "dep": "9:53 PM",
-  "arr": "6:35 AM",
-  "nextDay": 1,
-  "dur": "5h 42m",
-  "cabin": "First",
-  "fare": "First Classic",
-  "price": 3137,
-  "aircraft": "Airbus A321neo",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": true,
-  "seatLine": "Free seat selection",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Priority boarding (meal and lounge not confirmed)",
-  "note": ""
- },
- {
-  "id": "P04",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 2120",
-  "dep": "8:20 PM",
-  "arr": "5:26 AM",
-  "nextDay": 1,
-  "dur": "6h 06m",
-  "cabin": "Business (Mint)",
-  "fare": "Mint",
-  "price": 5171,
-  "aircraft": "Airbus A320",
-  "legroom": "Lie-flat seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": true,
-  "seatLine": "Free seat selection",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Free meal service",
-  "note": ""
- },
- {
-  "id": "P05",
-  "leg": "sat24",
-  "airline": "JetBlue",
-  "flight": "B6 220",
-  "dep": "2:45 PM",
-  "arr": "11:57 PM",
-  "nextDay": 0,
-  "dur": "6h 12m",
-  "cabin": "Business (Mint)",
-  "fare": "Mint",
-  "price": 5611,
-  "aircraft": "Airbus A320",
-  "legroom": "Lie-flat seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "Often delayed 30+ min",
-  "freeSeat": false,
-  "seatLine": "Seat details not confirmed for this flight",
-  "bags": "Not confirmed for this flight",
-  "perks": "Same Mint fare family as B6 2120 (not read line by line)",
-  "note": ""
- },
- {
-  "id": "P06",
-  "leg": "sun25",
-  "airline": "Delta",
-  "flight": "DL 571",
-  "dep": "9:53 PM",
-  "arr": "6:35 AM",
-  "nextDay": 1,
-  "dur": "5h 42m",
-  "cabin": "First",
-  "fare": "First Classic",
-  "price": 1507,
-  "aircraft": "Airbus A321neo",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": true,
-  "seatLine": "Free seat selection",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Priority boarding (meal and lounge not confirmed)",
-  "note": ""
- },
- {
-  "id": "P07",
-  "leg": "sun25",
-  "airline": "Alaska",
-  "flight": "AS 255",
-  "dep": "8:41 PM",
-  "arr": "5:28 AM",
-  "nextDay": 1,
-  "dur": "5h 47m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 1571,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Premium seat; seat selection not confirmed",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Free meal service, lounge access",
-  "note": ""
- },
- {
-  "id": "P08",
-  "leg": "sun25",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "8:15 AM",
-  "arr": "5:07 PM",
-  "nextDay": 0,
-  "dur": "5h 52m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 2437,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Standard recliner seat",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Premium seat; seat selection not confirmed",
-  "bags": "1 carry-on and 2 checked bags free, each",
-  "perks": "Free meal service, lounge access",
-  "note": ""
- },
- {
-  "id": "P09",
-  "leg": "wed28",
-  "airline": "Alaska",
-  "flight": "AS 256",
-  "dep": "7:51 AM",
-  "arr": "11:09 AM",
-  "nextDay": 0,
-  "dur": "6h 18m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 1567,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Not checked",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Not checked",
-  "bags": "Not checked",
-  "perks": "Not checked (price seen in Google fare panel only)",
-  "note": "Oct 28 first class was not fully searched"
- },
- {
-  "id": "P10",
-  "leg": "wed28",
-  "airline": "Alaska",
-  "flight": "AS 389",
-  "dep": "6:14 PM",
-  "arr": "9:35 PM",
-  "nextDay": 0,
-  "dur": "6h 21m",
-  "cabin": "First",
-  "fare": "First",
-  "price": 3807,
-  "aircraft": "Boeing 737 MAX 9",
-  "legroom": "Not checked",
-  "wifi": "Not checked",
-  "power": "Not checked",
-  "delay": "",
-  "freeSeat": false,
-  "seatLine": "Not checked",
-  "bags": "Not checked",
-  "perks": "Not checked (price seen in Google fare panel only)",
-  "note": "Oct 28 first class was not fully searched"
- }
-];
+// Generated by build-picker.mjs from seat-evidence/seat-evidence.csv. Airline prices only. Do not edit by hand.
+const FLIGHTS = [{"id":"F03","leg":"sat24","airline":"Alaska","flight":"AS 389","fare":"Main","cabin":"Economy","dep":"8:15 AM","arr":"5:07 PM","nextDay":0,"dur":"5h 52m","price":528,"readLine":"Read on airline site, Oct 8, 1:43 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 43 Main open, 3 aisle-aisle rows, last 6 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 3 (rows: 29, 30, 31). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P02","leg":"sat24","airline":"Alaska","flight":"AS 389","fare":"First","cabin":"First","dep":"8:15 AM","arr":"5:07 PM","nextDay":0,"dur":"5h 52m","price":2438,"readLine":"Read on airline site, Oct 8, 1:43 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 8 of 16 First open, 1 aisle-aisle row, last 4 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 1 (rows: 1). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F01","leg":"sat24","airline":"Alaska","flight":"AS 255","fare":"Main","cabin":"Economy","dep":"8:34 PM","arr":"5:21 AM","nextDay":1,"dur":"5h 47m","price":528,"readLine":"Read on airline site, Oct 8, 1:49 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 34 Main open, 2 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 2 (rows: 30, 31). One-time snapshot; seats change without notice.","tags":["Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P01","leg":"sat24","airline":"Alaska","flight":"AS 255","fare":"First","cabin":"First","dep":"8:34 PM","arr":"5:21 AM","nextDay":1,"dur":"5h 47m","price":1568,"readLine":"Read on airline site, Oct 8, 1:49 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 10 of 16 First open, 2 aisle-aisle rows, last 5 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 2 (rows: 3, 4). One-time snapshot; seats change without notice.","tags":["Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F11","leg":"sun25","airline":"Alaska","flight":"AS 389","fare":"Main","cabin":"Economy","dep":"8:15 AM","arr":"5:07 PM","nextDay":0,"dur":"5h 52m","price":762,"readLine":"Read on airline site, Oct 8, 1:50 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 32 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P08","leg":"sun25","airline":"Alaska","flight":"AS 389","fare":"First","cabin":"First","dep":"8:15 AM","arr":"5:07 PM","nextDay":0,"dur":"5h 52m","price":2438,"readLine":"Read on airline site, Oct 8, 1:50 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 4 of 16 First open, no aisle-aisle row, last 2 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 69% on-time, 15% late 30+ min, 7% canceled (SAN to BOS, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F08","leg":"sun25","airline":"Alaska","flight":"AS 255","fare":"Main","cabin":"Economy","dep":"8:41 PM","arr":"5:28 AM","nextDay":1,"dur":"5h 47m","price":568,"readLine":"Read on airline site, Oct 8, 1:52 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 41 Main open, 4 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 4 (rows: 22, 23, 30, 31). One-time snapshot; seats change without notice.","tags":["Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P07","leg":"sun25","airline":"Alaska","flight":"AS 255","fare":"First","cabin":"First","dep":"8:41 PM","arr":"5:28 AM","nextDay":1,"dur":"5h 47m","price":1572,"readLine":"Read on airline site, Oct 8, 1:52 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 13 of 16 First open, 2 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 2 (rows: 2, 4). One-time snapshot; seats change without notice.","tags":["Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 77% on-time, 22% late 30+ min, 0% canceled (SAN to BOS, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F17","leg":"wed28","airline":"Alaska","flight":"AS 256","fare":"Main","cabin":"Economy","dep":"7:51 AM","arr":"11:09 AM","nextDay":0,"dur":"6h 18m","price":528,"readLine":"Read on airline site, Oct 8, 1:53 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 56 Main open, 4 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 4 (rows: 27, 28, 29, 30). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 92% on-time, 0% late 30+ min, 7% canceled (BOS to SAN, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P09","leg":"wed28","airline":"Alaska","flight":"AS 256","fare":"First","cabin":"First","dep":"7:51 AM","arr":"11:09 AM","nextDay":0,"dur":"6h 18m","price":1568,"readLine":"Read on airline site, Oct 8, 1:53 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 9 of 16 First open, 1 aisle-aisle row, last 3 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 1 (rows: 1). One-time snapshot; seats change without notice.","tags":["No overnight","Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 92% on-time, 0% late 30+ min, 7% canceled (BOS to SAN, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F16","leg":"wed28","airline":"Alaska","flight":"AS 389","fare":"Main","cabin":"Economy","dep":"6:14 PM","arr":"9:35 PM","nextDay":0,"dur":"6h 21m","price":528,"readLine":"Read on airline site, Oct 8, 1:54 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 56 Main open, 6 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 6 (rows: 23, 27, 28, 29, 30, 31). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, Main: \"Seat selection in Main cabin\" (no price shown). Fees page: Main Preferred paid upgrades \"Starting at $9 USD\"; Premium Class paid upgrades \"Starting at $15 USD\". Exact seat price for this flight not read (seat map is preview only)."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, Main: \"General boarding\""],["On time","Alaska flight details \"Flight Performance\": 37% on-time, 62% late 30+ min, 0% canceled (BOS to SAN, previous month)"],["Change","Compare fares, Main: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"P10","leg":"wed28","airline":"Alaska","flight":"AS 389","fare":"First","cabin":"First","dep":"6:14 PM","arr":"9:35 PM","nextDay":0,"dur":"6h 21m","price":3808,"readLine":"Read on airline site, Oct 8, 1:54 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 4 of 16 First open, no aisle-aisle row, last 4 seats","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Compare fares, First/Business: \"Seat selection in First Class cabin\" (no price shown)."],["Checked bags","1st: Free · 2nd: not read"],["Carry-on","not read (not in Compare fares)"],["Legroom","not read"],["Power","Flight details amenities: \"In-seat power source\""],["Wi-Fi","Flight details amenities: \"Wi-Fi\" (price not read). Results page: \"Inflight Wi-Fi availability is subject to change without notice.\""],["Boarding","Compare fares, First/Business: \"Priority boarding\""],["On time","Alaska flight details \"Flight Performance\": 37% on-time, 62% late 30+ min, 0% canceled (BOS to SAN, previous month)"],["Change","Compare fares, First/Business: \"No flight change fees\". Fees page: \"Change/cancellation fee: Free ... Fare differences may apply.\""],["Cancel","Fees page footnote: \"Our 24-hour cancellation and same-day confirmed policies apply\". Same day confirmed changes: $75 USD (Main and First Class). Refund vs credit wording not read."]]},{"id":"F04","leg":"sat24","airline":"JetBlue","flight":"B6 2120","fare":"Main","cabin":"Economy","dep":"8:20 PM","arr":"5:26 AM","nextDay":1,"dur":"6h 6m","price":508,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 1 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","Fare includes seat choice","Only 1 seat open: cannot seat two together"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","JetBlue flight details \"Amenities & Performance\": On-time arrival 74%, delayed 30+ min 22%, cancelled 4%"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F05","leg":"sat24","airline":"JetBlue","flight":"B6 2120","fare":"Even More","cabin":"Premium Economy","dep":"8:20 PM","arr":"5:26 AM","nextDay":1,"dur":"6h 6m","price":926,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 16 of 30 Even More open, 1 aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 1 (rows: map column 5). One-time snapshot; seats change without notice.","tags":["Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","EvenMore: \"Free seat selection\" (EvenMore Base: \"No seat selection (auto-assigned)\"). Price of paid seats not read."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; \"Dedicated bin space for your free carry-on bag\""],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","EvenMore: \"Board in Group 2 (early boarding)\""],["On time","On-time arrival 74%, delayed 30+ min 22%, cancelled 4% (JetBlue Amenities & Performance tab)"],["Change","EvenMore: \"No change or cancel fee\"; EvenMore Base: \"Change & cancel fee\"; EvenMore Flex: no change or cancel fees, refundable, free same day switch / standby"],["Cancel","EvenMore Flex: \"Refundable to original form of payment\"; EvenMore and EvenMore Base cancellation wording not read on the card (Our Fares page lists Main fares only)"]]},{"id":"P04","leg":"sat24","airline":"JetBlue","flight":"B6 2120","fare":"Mint","cabin":"Business","dep":"8:20 PM","arr":"5:26 AM","nextDay":1,"dur":"6h 6m","price":5202,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 2 of 16 Mint open, 1 aisle-aisle row, 2 left at this price","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 1 (rows: Mint column 1: D and C both open). One-time snapshot; seats change without notice.","tags":["Most aisle-aisle rows (verified only)"],"more":[["Seat selection","Mint cards list no seat-selection line (fare card: lie-flat seats & suites, priority check-in, Group 1). Seat price not read."],["Checked bags","1st: Included · 2nd: Included"],["Carry-on","not read on Mint card (Our Fares page: carry-on included on Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Mint: \"Priority check-in & board in Group 1\""],["On time","On-time arrival 74%, delayed 30+ min 22%, cancelled 4%"],["Change","Mint: \"No change or cancel fee\" (Mint Flex adds refund and same day switch / standby)"],["Cancel","Mint card: \"No change or cancel fee\"; Mint Flex: \"Refundable to original form of payment\""]]},{"id":"F06","leg":"sat24","airline":"JetBlue","flight":"B6 220","fare":"Main","cabin":"Economy","dep":"2:45 PM","arr":"11:57 PM","nextDay":0,"dur":"6h 12m","price":728,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 0 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice","Only 0 seats open: cannot seat two together"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","not read (JetBlue Amenities & Performance shows N/A for on-time, delayed and cancelled)"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F07","leg":"sat24","airline":"JetBlue","flight":"B6 220","fare":"Even More","cabin":"Premium Economy","dep":"2:45 PM","arr":"11:57 PM","nextDay":0,"dur":"6h 12m","price":1146,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 10 of 30 Even More open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","EvenMore: \"Free seat selection\" (EvenMore Base: \"No seat selection (auto-assigned)\"). Price of paid seats not read."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; \"Dedicated bin space for your free carry-on bag\""],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","EvenMore: \"Board in Group 2 (early boarding)\""],["On time","not read (N/A on JetBlue page)"],["Change","EvenMore: \"No change or cancel fee\"; EvenMore Base: \"Change & cancel fee\"; EvenMore Flex: no change or cancel fees, refundable, free same day switch / standby"],["Cancel","EvenMore Flex: \"Refundable to original form of payment\"; EvenMore and EvenMore Base cancellation wording not read on the card (Our Fares page lists Main fares only)"]]},{"id":"P05","leg":"sat24","airline":"JetBlue","flight":"B6 220","fare":"Mint","cabin":"Business","dep":"2:45 PM","arr":"11:57 PM","nextDay":0,"dur":"6h 12m","price":5642,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 2 of 16 Mint open, no aisle-aisle row, 3 left at this price","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight"],"more":[["Seat selection","Mint cards list no seat-selection line (fare card: lie-flat seats & suites, priority check-in, Group 1). Seat price not read."],["Checked bags","1st: Included · 2nd: Included"],["Carry-on","not read on Mint card (Our Fares page: carry-on included on Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Mint: \"Priority check-in & board in Group 1\""],["On time","not read (N/A on JetBlue page)"],["Change","Mint: \"No change or cancel fee\" (Mint Flex adds refund and same day switch / standby)"],["Cancel","Mint card: \"No change or cancel fee\"; Mint Flex: \"Refundable to original form of payment\""]]},{"id":"F10","leg":"sun25","airline":"JetBlue","flight":"B6 2120","fare":"Main","cabin":"Economy","dep":"8:26 PM","arr":"5:00 AM","nextDay":1,"dur":"5h 34m","price":594,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 9 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["Fare includes seat choice"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","On-time arrival 74%, delayed 30+ min 22%, cancelled 4% (JetBlue Amenities & Performance tab)"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F13","leg":"sun25","airline":"JetBlue","flight":"B6 220","fare":"Main","cabin":"Economy","dep":"2:07 PM","arr":"11:00 PM","nextDay":0,"dur":"5h 53m","price":860,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 3 Main open, no aisle-aisle row, 3 left at this price","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","not read (N/A on JetBlue page)"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F14","leg":"sun25","airline":"JetBlue","flight":"B6 620","fare":"Main","cabin":"Economy","dep":"11:41 AM","arr":"8:29 PM","nextDay":0,"dur":"5h 48m","price":1438,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 0 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["No overnight","Fare includes seat choice","Only 0 seats open: cannot seat two together"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","not read (N/A on JetBlue page)"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F18","leg":"wed28","airline":"JetBlue","flight":"B6 619","fare":"Main","cabin":"Economy","dep":"7:00 AM","arr":"10:31 AM","nextDay":0,"dur":"6h 31m","price":412,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 46 Main open, 7 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 7 (rows: map columns 15, 18, 19, 20, 21, 22, 23). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","No overnight","Fare includes seat choice"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","not read (N/A on JetBlue page)"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F19","leg":"wed28","airline":"JetBlue","flight":"B6 219","fare":"Main","cabin":"Economy","dep":"9:30 AM","arr":"12:56 PM","nextDay":0,"dur":"6h 26m","price":412,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 7 Main open, no aisle-aisle row","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","No overnight","Fare includes seat choice"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","JetBlue Amenities & Performance: On-time arrival 80%, delayed 30+ min 0%, cancelled 0%"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"N2","leg":"wed28","airline":"JetBlue","flight":"B6 319","fare":"Main","cabin":"Economy","dep":"3:50 PM","arr":"7:14 PM","nextDay":0,"dur":"6h 24m","price":412,"readLine":"Read on airline site, Oct 8, 2:20 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 29 Main open, 3 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 3 (rows: map columns 21, 22, 23). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","No overnight","Fare includes seat choice"],"more":[["Seat selection","Main: \"Free seat selection\" (Main Base: \"No free seat selection\"). Our Fares page: Seat selection $ for Main Base, check for Main and Main Flex. Price of paid seats (Preferred, Extra legroom) not read (view-only map)."],["Checked bags","1st: $45 · 2nd: $59"],["Carry-on","Carry-on bag included; personal item included (all Main fares)"],["Legroom","not read (JetBlue pages show only \"Extra legroom\" for EvenMore and \"most legroom in coach\"; no inches)"],["Power","Seat map panel: \"in-seat power\" (A321). Main page: \"power ports at every seat (or every row, depending on aircraft)\"."],["Wi-Fi","Flight Amenities tab: \"free wi-fi, free live TV & movies\"; Main page: free Fly-Fi for everyone"],["Boarding","Main: \"Board in Groups 4-7\" (Main Base: Group 8, last; Main Flex: Group 3, early boarding)"],["On time","JetBlue Amenities & Performance: On-time arrival 64%, delayed 30+ min 25%, cancelled 4%"],["Change","Main: \"No change or cancel fees\". Main Base: \"Change & cancel fee\". Main Flex: no change or cancel fees, free same day switch / standby. Our Fares: Changes check for Main."],["Cancel","Our Fares: Main = \"Travel credit\"; Main Base = \"Travel credit minus fee\"; Main Flex = \"Refund to original payment\" (card shows \"Refundable to original form of payment\")"]]},{"id":"F15","leg":"wed28","airline":"Delta","flight":"DL 571","fare":"Main","cabin":"Economy","dep":"5:10 PM","arr":"8:28 PM","nextDay":0,"dur":"6h 18m","price":412,"readLine":"Read on airline site, Oct 8, 2:27 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 70 Main open, 10 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 10 (rows: 23, 24, 29, 32, 33, 34, 35, 36, 37, 38). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","No overnight","Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Seat map panel, Main: \"Select your seat in advance for more peace of mind and manage your trip easily without change fees for flights originating in United States, Canada, and the Caribbean\". Delta Main (Classic) includes advance seat selection; Delta Main Basic (hidden unless Include Basic is ticked, price not read) is the fare without it. No separate per-seat price is shown on the view-only map (the panel lists each cabin fare as \"Additional Amount\"), so a seat fee is not read. Comfort seats are sold as the Comfort fare, First seats as the First fare."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","Compare Our Products, Main: \"One carry-on bag and one personal item\""],["Legroom","not read (Delta pages show no seat pitch in inches for Main or Comfort)"],["Power","Flight Details icon strip shows icons without text labels; text for Main power not read"],["Wi-Fi","Results card tag: \"Free Wi-Fi for SkyMiles Members\" (price for non-members not read)"],["Boarding","Compare Our Products, Main: \"Board in Zones 5-8\""],["On time","Delta flight details \"DL571 Flight Performance\" (preceding month): On Time 58%, +30 mins 26%, +60 mins N/A, Cancelled N/A"],["Change","Seat map panel, Main: \"without change fees for flights originating in United States, Canada, and the Caribbean\". Delta fees page: \"There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada\" (Delta Main Basic: $99)."],["Cancel","Delta fees page, change/cancel table (US to US): \"Classic tickets: free\"; and \"If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference\". Refund-to-card versus eCredit wording for a cancellation not read."]]},{"id":"F02","leg":"sat24","airline":"Delta","flight":"DL 571","fare":"Main","cabin":"Economy","dep":"9:53 PM","arr":"6:35 AM","nextDay":1,"dur":"5h 42m","price":508,"readLine":"Read on airline site, Oct 8, 2:33 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 75 Main open, 10 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 10 (rows: 23, 24, 32, 33, 34, 35, 36, 37, 38, 39). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Seat map panel, Main: \"Select your seat in advance for more peace of mind and manage your trip easily without change fees for flights originating in United States, Canada, and the Caribbean\". Delta Main (Classic) includes advance seat selection; Delta Main Basic (hidden unless Include Basic is ticked, price not read) is the fare without it. No separate per-seat price is shown on the view-only map (the panel lists each cabin fare as \"Additional Amount\"), so a seat fee is not read. Comfort seats are sold as the Comfort fare, First seats as the First fare."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","Compare Our Products, Main: \"One carry-on bag and one personal item\""],["Legroom","not read (Delta pages show no seat pitch in inches for Main or Comfort)"],["Power","Flight Details icon strip shows icons without text labels; text for Main power not read"],["Wi-Fi","Results card tag: \"Free Wi-Fi for SkyMiles Members\" (price for non-members not read)"],["Boarding","Compare Our Products, Main: \"Board in Zones 5-8\""],["On time","Delta flight details \"DL571 Flight Performance\" (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A"],["Change","Seat map panel, Main: \"without change fees for flights originating in United States, Canada, and the Caribbean\". Delta fees page: \"There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada\" (Delta Main Basic: $99)."],["Cancel","Delta fees page, change/cancel table (US to US): \"Classic tickets: free\"; and \"If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference\". Refund-to-card versus eCredit wording for a cancellation not read."]]},{"id":"F09","leg":"sun25","airline":"Delta","flight":"DL 571","fare":"Main","cabin":"Economy","dep":"9:53 PM","arr":"6:35 AM","nextDay":1,"dur":"5h 42m","price":548,"readLine":"Read on airline site, Oct 8, 2:38 PM ET","verified":true,"seatCls":"ok","seatShort":"Seats: 63 Main open, 6 aisle-aisle rows","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 6 (rows: 24, 35, 36, 37, 38, 39). One-time snapshot; seats change without notice.","tags":["Lowest price among economy options of that day","Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Seat map panel, Main: \"Select your seat in advance for more peace of mind and manage your trip easily without change fees for flights originating in United States, Canada, and the Caribbean\". Delta Main (Classic) includes advance seat selection; Delta Main Basic (hidden unless Include Basic is ticked, price not read) is the fare without it. No separate per-seat price is shown on the view-only map (the panel lists each cabin fare as \"Additional Amount\"), so a seat fee is not read. Comfort seats are sold as the Comfort fare, First seats as the First fare."],["Checked bags","1st: $45 · 2nd: $55"],["Carry-on","Compare Our Products, Main: \"One carry-on bag and one personal item\""],["Legroom","not read (Delta pages show no seat pitch in inches for Main or Comfort)"],["Power","Flight Details icon strip shows icons without text labels; text for Main power not read"],["Wi-Fi","Results card tag: \"Free Wi-Fi for SkyMiles Members\" (price for non-members not read)"],["Boarding","Compare Our Products, Main: \"Board in Zones 5-8\""],["On time","Delta flight details \"DL571 Flight Performance\" (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A"],["Change","Seat map panel, Main: \"without change fees for flights originating in United States, Canada, and the Caribbean\". Delta fees page: \"There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada\" (Delta Main Basic: $99)."],["Cancel","Delta fees page, change/cancel table (US to US): \"Classic tickets: free\"; and \"If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference\". Refund-to-card versus eCredit wording for a cancellation not read."]]},{"id":"P03","leg":"sat24","airline":"Delta","flight":"DL 571","fare":"First","cabin":"First","dep":"9:53 PM","arr":"6:35 AM","nextDay":1,"dur":"5h 42m","price":2058,"readLine":"Read on airline site, Oct 8, 2:33 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 10 of 20 First open, no aisle-aisle row, 4 left at this price","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 0 (rows: none). One-time snapshot; seats change without notice.","tags":["Fare includes seat choice"],"more":[["Seat selection","Seat map panel lists First \"Additional Amount\" equal to the First fare; seat choice is part of the First fare. No separate per-seat price shown (view-only map), so a seat fee is not read."],["Checked bags","1st: not read · 2nd: not read"],["Carry-on","Compare Our Products, First: \"Dedicated overhead bin space\" (carry-on count for First not separately worded)"],["Legroom","not read as pitch; Delta First Features text: \"up to 8 inches extra legroom compared to a standard Delta Main seat, and up to 5.4-inch recline\""],["Power","First details: \"110-volt outlets at every seat, including USB ports\""],["Wi-Fi","Results card tag: \"Free Wi-Fi for SkyMiles Members\" (price for non-members not read)"],["Boarding","Compare Our Products, First: \"Board first in Zone 1\"; First details: \"Sky Priority check-in and security access where available\""],["On time","Delta flight details \"DL571 Flight Performance\" (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A"],["Change","Delta fees page: \"There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada\" (Delta First Basic: $300). Fare read is the non-Basic First fare (Include Basic was not ticked)."],["Cancel","Delta fees page, change/cancel table (US to US): \"Classic tickets: free\"; and \"If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference\". Refund-to-card versus eCredit wording for a cancellation not read."]]},{"id":"P06","leg":"sun25","airline":"Delta","flight":"DL 571","fare":"First","cabin":"First","dep":"9:53 PM","arr":"6:35 AM","nextDay":1,"dur":"5h 42m","price":1508,"readLine":"Read on airline site, Oct 8, 2:38 PM ET","verified":true,"seatCls":"tight","seatShort":"Seats: 14 of 20 First open, 2 aisle-aisle rows, 3 left at this price","seatLong":"Checked against the airline seat map. Aisle-aisle means both aisle seats are open in the same row. As read: 2 (rows: 4, 5). One-time snapshot; seats change without notice.","tags":["Most aisle-aisle rows (verified only)","Fare includes seat choice"],"more":[["Seat selection","Seat map panel lists First \"Additional Amount\" equal to the First fare; seat choice is part of the First fare. No separate per-seat price shown (view-only map), so a seat fee is not read."],["Checked bags","1st: not read · 2nd: not read"],["Carry-on","Compare Our Products, First: \"Dedicated overhead bin space\" (carry-on count for First not separately worded)"],["Legroom","not read as pitch; Delta First Features text: \"up to 8 inches extra legroom compared to a standard Delta Main seat, and up to 5.4-inch recline\""],["Power","First details: \"110-volt outlets at every seat, including USB ports\""],["Wi-Fi","Results card tag: \"Free Wi-Fi for SkyMiles Members\" (price for non-members not read)"],["Boarding","Compare Our Products, First: \"Board first in Zone 1\"; First details: \"Sky Priority check-in and security access where available\""],["On time","Delta flight details \"DL571 Flight Performance\" (preceding month): On Time 77%, +30 mins 19%, +60 mins N/A, Cancelled N/A"],["Change","Delta fees page: \"There is no change fee for Classic, Extra or Refundable tickets originating from the United States and Canada\" (Delta First Basic: $300). Fare read is the non-Basic First fare (Include Basic was not ticked)."],["Cancel","Delta fees page, change/cancel table (US to US): \"Classic tickets: free\"; and \"If your new flight costs less than your current flight, you may be issued an eCredit for the fare difference\". Refund-to-card versus eCredit wording for a cancellation not read."]]},{"id":"N1","leg":"sat24","airline":"Southwest","flight":"WN 4440","fare":"Choice","cabin":"Economy","dep":"11:40 AM","arr":"8:15 PM","nextDay":0,"dur":"5h 35m","price":508,"readLine":"Read on airline site, Oct 8, 2:45 PM ET","verified":false,"seatCls":"unknown","seatShort":"Seats: read on the airline site, not yet verified","seatLong":"No seat numbers are shown until they are checked against the airline seat map. Southwest says its seat map may not show all reserved seats.","tags":["Lowest price among economy options of that day","No overnight","Fare includes seat choice"],"more":[["Seat selection","Fare benefits: Choice = \"Standard (select at booking)\" so a Standard seat can be chosen at booking on Choice; Basic = \"Standard (assigned at check-in)\". Preferred seat \"$\" and Extra Legroom seat \"$\" on Choice (amounts not read); Standard seat ticked. Southwest help-centre banner: \"All Southwest flights now have assigned seats! Learn more.\" Results row labels: Basic \"Seat assigned at check-in\", Choice \"Standard seat included\", Choice Preferred \"Preferred seat included\", Choice Extra \"Extra Legroom seat included\"."],["Checked bags","1st: not read · 2nd: not read"],["Carry-on","not read (not in Fare benefits)"],["Legroom","not read (Southwest pages show no inches)"],["Power","not read"],["Wi-Fi","Fare benefits: Inflight WiFi \"$\" on Choice (Free for Rapid Rewards Members). Flyout: \"Free Wifi & Texting for Rapid Rewards Members thanks to T-Mobile\". Price not read."],["Boarding","Fare benefits, Choice: Boarding group \"General\" (Basic \"Last\"; Choice Preferred \"Early General (Groups 3-4)\"; Choice Extra \"Early (Group 1)\"). Priority Boarding \"$\"."],["On time","Flight information flyout WN 4440: % Ontime arrival N/A, % > 30 min late N/A, % Cancellation N/A, Average delay time N/A"],["Change","Fare benefits, Choice: Changes \"Fare difference may apply\"; \"Free same-day change/standby (taxes and fees may apply)\" is ticked. Basic: \"Available with fare upgrade\"."],["Cancel","Fare benefits, Choice: \"No cancel fees\" ticked; Refundability \"Transferable Flight Credit\" (Basic: \"Non-transferable flight credit\"); flight credit expiration 12 mos (Basic 6 mos). Cash refund wording not read."]]},{"id":"F12","leg":"sun25","airline":"Southwest","flight":"WN 765","fare":"Choice","cabin":"Economy","dep":"3:00 PM","arr":"11:35 PM","nextDay":0,"dur":"5h 35m","price":778,"readLine":"Read on airline site, Oct 8, 2:50 PM ET","verified":false,"seatCls":"unknown","seatShort":"Seats: read on the airline site, not yet verified","seatLong":"No seat numbers are shown until they are checked against the airline seat map. Southwest says its seat map may not show all reserved seats.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Fare benefits: Choice = \"Standard (select at booking)\" so a Standard seat can be chosen at booking on Choice; Basic = \"Standard (assigned at check-in)\". Preferred seat \"$\" and Extra Legroom seat \"$\" on Choice (amounts not read); Standard seat ticked. Southwest help-centre banner: \"All Southwest flights now have assigned seats! Learn more.\" Results row labels: Basic \"Seat assigned at check-in\", Choice \"Standard seat included\", Choice Preferred \"Preferred seat included\", Choice Extra \"Extra Legroom seat included\"."],["Checked bags","1st: not read · 2nd: not read"],["Carry-on","not read (not in Fare benefits)"],["Legroom","not read (Southwest pages show no inches)"],["Power","not read"],["Wi-Fi","Fare benefits: Inflight WiFi \"$\" on Choice (Free for Rapid Rewards Members). Flyout: \"Free Wifi & Texting for Rapid Rewards Members thanks to T-Mobile\". Price not read."],["Boarding","Fare benefits, Choice: Boarding group \"General\" (Basic \"Last\"; Choice Preferred \"Early General (Groups 3-4)\"; Choice Extra \"Early (Group 1)\"). Priority Boarding \"$\"."],["On time","not read (flyout not opened on this flight; WN 4440 flyout showed N/A for all performance fields)"],["Change","Fare benefits, Choice: Changes \"Fare difference may apply\"; \"Free same-day change/standby (taxes and fees may apply)\" is ticked. Basic: \"Available with fare upgrade\"."],["Cancel","Fare benefits, Choice: \"No cancel fees\" ticked; Refundability \"Transferable Flight Credit\" (Basic: \"Non-transferable flight credit\"); flight credit expiration 12 mos (Basic 6 mos). Cash refund wording not read."]]},{"id":"F20","leg":"wed28","airline":"Southwest","flight":"WN 4382","fare":"Choice","cabin":"Economy","dep":"10:35 AM","arr":"1:50 PM","nextDay":0,"dur":"6h 15m","price":508,"readLine":"Read on airline site, Oct 8, 2:53 PM ET","verified":false,"seatCls":"unknown","seatShort":"Seats: read on the airline site, not yet verified","seatLong":"No seat numbers are shown until they are checked against the airline seat map. Southwest says its seat map may not show all reserved seats.","tags":["No overnight","Fare includes seat choice"],"more":[["Seat selection","Fare benefits: Choice = \"Standard (select at booking)\" so a Standard seat can be chosen at booking on Choice; Basic = \"Standard (assigned at check-in)\". Preferred seat \"$\" and Extra Legroom seat \"$\" on Choice (amounts not read); Standard seat ticked. Southwest help-centre banner: \"All Southwest flights now have assigned seats! Learn more.\" Results row labels: Basic \"Seat assigned at check-in\", Choice \"Standard seat included\", Choice Preferred \"Preferred seat included\", Choice Extra \"Extra Legroom seat included\"."],["Checked bags","1st: not read · 2nd: not read"],["Carry-on","not read (not in Fare benefits)"],["Legroom","not read (Southwest pages show no inches)"],["Power","not read"],["Wi-Fi","Fare benefits: Inflight WiFi \"$\" on Choice (Free for Rapid Rewards Members). Flyout: \"Free Wifi & Texting for Rapid Rewards Members thanks to T-Mobile\". Price not read."],["Boarding","Fare benefits, Choice: Boarding group \"General\" (Basic \"Last\"; Choice Preferred \"Early General (Groups 3-4)\"; Choice Extra \"Early (Group 1)\"). Priority Boarding \"$\"."],["On time","not read (flyout not opened on this flight)"],["Change","Fare benefits, Choice: Changes \"Fare difference may apply\"; \"Free same-day change/standby (taxes and fees may apply)\" is ticked. Basic: \"Available with fare upgrade\"."],["Cancel","Fare benefits, Choice: \"No cancel fees\" ticked; Refundability \"Transferable Flight Credit\" (Basic: \"Non-transferable flight credit\"); flight credit expiration 12 mos (Basic 6 mos). Cash refund wording not read."]]}];
 
-const DAYS = {
-  sat24: { label: 'Sat, Oct 24', note: '' },
-  sun25: { label: 'Sun, Oct 25', note: 'The hotel is booked from Saturday. The partner summit is Sunday, noon to 5 p.m. Every Sunday flight lands after it starts.' },
-};
-const PLANS = [
-  { id: 'low',   name: 'Lowest price',   blurb: 'Alaska both ways, at a low fare with seat selection.', out: 'F01', ret: 'F16', caution: 'The flight to Boston is overnight. It lands at 5:21 a.m.' },
-  { id: 'day',   name: 'Daytime flights', blurb: 'Alaska both ways, with no overnight flight.', out: 'F03', ret: 'F16', caution: '' },
-  { id: 'first', name: 'First class',    blurb: 'Alaska First both ways.', out: 'P01', ret: 'P09', caution: 'Seat selection is not confirmed. The flight home was not fully checked.' },
-];
+const DAYS = {"sat24":{"label":"Sat, Oct 24","note":"Hotel is booked from Saturday, Oct 24."},"sun25":{"label":"Sun, Oct 25","note":"Hotel is booked from Saturday, Oct 24. The partner summit is Sunday, noon to 5 p.m.; every Sunday flight lands after it starts (the earliest lands 5:07 PM, after it ends)."}};
+const PLANS = [{"id":"low","name":"Lowest price that fits your seating","blurb":"Lowest fare where both aisle seats across the aisle are verified open. Ties go to the earlier departure.","out":"F02","ret":"F18","caution":"Overnight to Boston, landing 6:35 AM the next day."},{"id":"day","name":"Daytime","blurb":"Cheapest flights that do not land the next day and have verified aisle-aisle seats. Ties go to the earlier departure.","out":"F03","ret":"F18","caution":""},{"id":"fit","name":"Best seat fit","blurb":"Most rows with both aisle seats open, from verified seat maps only. Cheaper wins ties.","out":"F02","ret":"F15","caution":"Overnight to Boston, landing 6:35 AM the next day."},{"id":"first","name":"First class","blurb":"Cheapest First or business fare each way with at least 2 seats verified open.","out":"P01","ret":"P09","caution":"Overnight to Boston, landing 5:21 AM the next day."}];
 
-// Source: Seat-Availability-Check-2026-10-08.md (one-time snapshot on Oct 8; seat maps change without notice).
-const SEATS = {
-  F01: ['ok', 'Alaska Main: 35 seats open. 14 side-by-side pairs, 8 of them with an aisle seat.'],
-  F08: ['ok', 'Alaska Main: 41 seats open. 21 side-by-side pairs, 12 of them with an aisle seat.'],
-  F16: ['ok', 'Alaska Main: 56 seats open. 32 side-by-side pairs, 15 of them with an aisle seat.'],
-  F17: ['ok', 'Alaska Main: 56 seats open. 30 side-by-side pairs, 14 of them with an aisle seat.'],
-  F04: ['tight', 'JetBlue Main: only 1 of 68 seats open, so two seats together are not available.'],
-  F05: ['ok', 'JetBlue Even More: 16 of 30 seats open. Side-by-side pairs not counted.'],
-  F10: ['tight', 'JetBlue Main: 9 of 68 seats open. Side-by-side pairs not counted.'],
-  F18: ['ok', 'JetBlue Main: 46 of 68 seats open. Side-by-side pairs not counted.'],
-  N1:  ['unknown', 'Southwest says most standard seats are already reserved and assigned at check-in. Only part of the seat map was read.'],
-  F02: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
-  F09: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
-  F15: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
-  P01: ['ok', 'Alaska First: 10 seats open. Alaska shows “last 5 seats” at this price.'],
-  P07: ['ok', 'Alaska First: 13 seats open. No “last seats” warning.'],
-  P09: ['ok', 'Alaska First: 9 seats open. Alaska shows “last 4 seats” at this price.'],
-  P10: ['tight', 'Alaska First: 4 seats open. Alaska shows “last 4 seats” at this price.'],
-  P04: ['tight', 'JetBlue Mint: 2 of 16 seats open. JetBlue shows “2 left at this price”.'],
-  P06: ['unknown', 'Delta shows “3 left at this price”. Seat map not checked.'],
-};
-const seatInfo = f => SEATS[f.id] || ['unknown', 'Seat availability not checked for this flight.'];
+const seatInfo = f => [f.seatCls, f.seatLong];
 const SEATWORD = { ok: 'plenty open', tight: 'tight', unknown: 'not checked' };
 const money = n => '$' + n.toLocaleString('en-US');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const byId = id => FLIGHTS.find(f => f.id === id);
 const state = { out: null, ret: null, day: 'sat24', bags: '', seats: '' };
 
-function flightLine(f) { return `${f.airline} ${f.flight} · ${f.dep} → ${f.arr}${f.nextDay ? ' +1' : ''}`; }
+const dateOf = f => dayOf(f).replace(',', '');
+const apFrom = f => f.leg === 'wed28' ? 'BOS' : 'SAN';
+const apTo = f => f.leg === 'wed28' ? 'SAN' : 'BOS';
+const stopsOf = f => f.stops ? f.stops : 'Nonstop';
+const routeOf = f => `${apFrom(f)} ${f.dep} → ${apTo(f)} ${f.arr}${f.nextDay ? ' +1' : ''}`;
+function seatShort(f) { return f.seatShort; }
+const fareName = f => f.airline + ' ' + f.flight + ' ' + f.fare;
+// standard order: date, route with times, stops, travel time, airline and flight, seats, total price for 2
+function flightLine(f) { return [dateOf(f), routeOf(f), stopsOf(f), f.dur, fareName(f), seatShort(f), money(f.price) + ' total for 2'].join(' · '); }
 function dayOf(f) { return f.leg === 'wed28' ? 'Wed, Oct 28' : DAYS[f.leg].label; }
 
 /* plans */
@@ -882,27 +361,26 @@ function renderPlans() {
   plansEl.innerHTML = PLANS.map(p => {
     const o = byId(p.out), r = byId(p.ret);
     const on = state.out === o && state.ret === r;
-    return `<div class="plan ${on ? 'on' : ''}">
-      <div class="plan-top"><span class="plan-name">${p.name}</span><span class="plan-price">${money(o.price + r.price)} <small>both ways, total for 2</small></span></div>
-      <p>${p.blurb}</p>
-      <ul><li><b>${dayOf(o)}</b> ${esc(flightLine(o))}</li><li><b>${dayOf(r)}</b> ${esc(flightLine(r))}</li></ul>
-      <div class="seatline">Seats open: ${SEATWORD[seatInfo(o)[0]]} to Boston, ${SEATWORD[seatInfo(r)[0]]} home.</div>
+    const leg = (f, head) => `<div class="callout"><p class="legh">${dateOf(f)} · ${head}</p><dl><dt>Route</dt><dd><b>${esc(routeOf(f))}</b></dd><dt>Trip</dt><dd>${esc(stopsOf(f))} · ${esc(f.dur)}</dd><dt>Flight</dt><dd>${esc(fareName(f))}</dd><dt>Seats</dt><dd>${pill(f)}</dd><dt>Price</dt><dd><b>${money(f.price)}</b><span class="al">total for 2</span><p class="rd">${esc(f.readLine)}</p></dd></dl>${f.tags.length ? `<div class="chips">${f.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}</div>`;
+    const pill = f => `<span class="pill ${seatInfo(f)[0]}">${esc(seatShort(f).replace('Seats: ', ''))}</span>`;
+    return `<div class="card plan ${on ? 'on' : ''}" data-plan="${p.id}">
+      <div class="plan-top"><h3 class="plan-name">${p.name}</h3><span class="mark" aria-hidden="true"></span></div>
+      <p class="blurb">${p.blurb}</p>
+      ${leg(o, 'To Boston')}${leg(r, 'Home')}
       ${p.caution ? `<div class="caution">${p.caution}</div>` : ''}
-      <button type="button" data-plan="${p.id}">${on ? 'Selected' : 'Use this plan'}</button>
+      <div class="plan-price"><span>Round trip, total for 2</span><b>${money(o.price + r.price)}</b></div>
+      <button type="button" data-plan="${p.id}" aria-pressed="${on}">${on ? 'Selected' : 'Use this plan'}</button>
     </div>`;
   }).join('');
 }
 plansEl.addEventListener('click', e => {
-  const b = e.target.closest('button[data-plan]'); if (!b) return;
+  const b = e.target.closest('[data-plan]'); if (!b) return;
   const p = PLANS.find(x => x.id === b.dataset.plan);
   choose('out', byId(p.out)); choose('ret', byId(p.ret));
 });
 
 /* build your own */
-function optionLabel(f) {
-  const cab = f.cabin === 'Economy' ? '' : ' · ' + f.cabin;
-  return `${money(f.price)} · ${f.airline} ${f.flight} · ${f.dep} → ${f.arr}${f.nextDay ? ' +1' : ''}${cab}`;
-}
+function optionLabel(f) { return flightLine(f); }
 function groupHtml(opts) {
   const groups = [['Economy', f => f.cabin === 'Economy'], ['Premium economy', f => f.cabin === 'Premium Economy'], ['First and business', f => /First|Business/.test(f.cabin)]];
   return groups.map(([name, test]) => {
@@ -917,33 +395,24 @@ function fillSelect(which, key) {
   sel.value = state[which] && state[which].leg === key ? state[which].id : '';
 }
 function detailHtml(f, from, to) {
-  const seat = f.seatLine || 'Free seat selection';
-  const bags = f.bags || '1 carry-on free, first checked bag $45 each';
-  const warns = [];
-  if (f.nextDay) warns.push('Overnight, lands next day');
-  if (f.delay) warns.push(f.delay);
-  if (f.note) warns.push(f.note);
-  if (f.rise) warns.push('Google says this price may go up within a day');
+  const chips = (f.nextDay ? ['Overnight, lands next day'] : []).concat(f.tags);
+  const si = seatInfo(f);
   return `
-    <div class="d-top">
-      <div><div class="d-airline">${esc(f.airline)}</div><div class="d-flight">${esc(f.flight)} · Nonstop · ${esc(f.cabin === f.fare ? f.cabin : f.cabin + ' · ' + f.fare)}</div></div>
-      <div class="price">${money(f.price)}<small>total for 2</small></div>
-    </div>
+    <p class="legh">${dateOf(f)}</p>
     <div class="times">
-      <div class="t"><b>${f.dep}</b><span>${from}</span></div>
-      <div class="bar"><i>${f.dur}</i></div>
-      <div class="t" style="text-align:right"><b>${f.arr}${f.nextDay ? ' <sup>+1</sup>' : ''}</b><span>${to}</span></div>
+      <div class="t"><b>${f.dep}</b><span>${apFrom(f)} · ${from}</span></div>
+      <div class="bar"><i>${stopsOf(f)}</i></div>
+      <div class="t" style="text-align:right"><b>${f.arr}${f.nextDay ? ' <sup>+1</sup>' : ''}</b><span>${apTo(f)} · ${to}</span></div>
     </div>
-    <dl class="grid">
-      <div><dt>Seats</dt><dd>${esc(seat)}</dd></div>
-      <div><dt>Bags</dt><dd>${esc(bags)}</dd></div>
-      <div><dt>Legroom</dt><dd>${esc(f.legroom)}</dd></div>${f.perks ? `<div><dt>Included</dt><dd>${esc(f.perks)}</dd></div>` : ''}
-    </dl>
-    <div class="seatbox ${seatInfo(f)[0]}"><b>Seats open for you and Alex</b>${esc(seatInfo(f)[1])}<small>Snapshot from Oct 8. Seat maps change without notice.</small></div>
+    <div class="d-flight">Travel time ${f.dur}</div>
+    <div class="d-airline">${esc(fareName(f))}</div>
+    <div class="seatrow"><span class="pill ${si[0]}">${esc(seatShort(f))}</span><span>${esc(si[1])}</span></div>
+    ${chips.length ? `<div class="chips">${chips.map(w => `<span class="chip">${esc(w)}</span>`).join('')}</div>` : ''}
+    <div class="price">${money(f.price)}<small>total for 2</small></div>
+    <p class="rd">${esc(f.readLine)}</p>
     <details class="more"><summary>More details</summary>
-      <dl class="grid"><div><dt>Aircraft</dt><dd>${esc(f.aircraft)}</dd></div><div><dt>Wi-Fi</dt><dd>${esc(f.wifi)}</dd></div><div><dt>Power</dt><dd>${esc(f.power)}</dd></div></dl>
-    </details>
-    ${warns.length ? `<div class="chips">${warns.map(w => `<span class="chip">${esc(w)}</span>`).join('')}</div>` : ''}`;
+      <dl class="grid">${f.more.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+    </details>`;
 }
 const AIR = { SAN: 'San Diego', BOS: 'Boston' };
 function renderDetail(which) {
@@ -978,15 +447,15 @@ document.getElementById('days').addEventListener('click', e => {
 document.querySelectorAll('.q').forEach(q => q.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   state[q.dataset.q] = b.textContent;
-  q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  q.querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
   renderAll();
 }));
 
 /* summary + send */
 function message() {
   const lines = ['Hi Luis, my flight choices for me and Alex:', ''];
-  lines.push(`To Boston: ${dayOf(state.out)} · ${flightLine(state.out)} · ${state.out.cabin} · ${money(state.out.price)}`);
-  lines.push(`Home: ${dayOf(state.ret)} · ${flightLine(state.ret)} · ${state.ret.cabin} · ${money(state.ret.price)}`);
+  lines.push(`To Boston: ${flightLine(state.out)}`, `   (${state.out.readLine})`);
+  lines.push(`Home: ${flightLine(state.ret)}`, `   (${state.ret.readLine})`);
   lines.push(`Total for both: ${money(state.out.price + state.ret.price)}`);
   lines.push('', `Checked bags each: ${state.bags || 'not answered'}`, `Seats (me aisle, Alex across the aisle): ${state.seats || 'not answered'}`);
   const note = document.getElementById('note').value.trim();
@@ -996,15 +465,52 @@ function message() {
 }
 function renderAll() {
   renderPlans();
-  const rows = [['To Boston', state.out], ['Home, Wed, Oct 28', state.ret]];
-  document.getElementById('sumList').innerHTML = rows.map(([t, f]) =>
-    `<li><span>${f && t === 'To Boston' ? dayOf(f) : t}</span><span>${f ? esc(f.airline + ' ' + f.flight) + ' · ' + money(f.price) : 'not chosen yet'}</span></li>`).join('');
+  const rows = [['To Boston', state.out ? flightLine(state.out) : 'not chosen yet'], ['Home, Wed, Oct 28', state.ret ? flightLine(state.ret) : 'not chosen yet'],
+    ['Checked bags each', state.bags || 'not answered yet'], ['Seats', state.seats || 'not answered yet']];
+  document.getElementById('sumList').innerHTML = rows.map(([t, v]) => `<li><b>${t}</b><span>${esc(v)}</span></li>`).join('');
   const total = (state.out ? state.out.price : 0) + (state.ret ? state.ret.price : 0);
   document.getElementById('sumTotal').textContent = money(total);
   const ready = !!(state.out && state.ret);
+  if (sentSig && sentSig !== sigNow()) sentSig = '';      /* a changed choice means the last send is out of date */
+  const isSent = !!sentSig;
   document.getElementById('send').disabled = !ready || sending;
+  document.getElementById('send').hidden = isSent;
+  document.getElementById('sent').hidden = !isSent;
   document.getElementById('copy').disabled = !ready;
+  const sb = document.querySelector('#send .bt strong'); if (sb) sb.textContent = sentBefore ? 'Confirm again' : 'Confirm my choices';
+  renderProgress(ready, isSent, total);
 }
+let sentSig = '', sentBefore = false;
+const sigNow = () => [state.out && state.out.id, state.ret && state.ret.id, state.bags, state.seats, document.getElementById('note').value.trim()].join('|');
+function renderProgress(ready, isSent, total) {
+  const answered = !!(state.bags && state.seats);
+  const cur = !ready ? 1 : (!answered ? 2 : 3);
+  const done = [ready, answered && ready, isSent];
+  const sub = [
+    ready ? 'Both chosen' : (state.out || state.ret ? 'One more to go' : 'Pick a plan or build'),
+    answered ? 'Answered' : 'Optional',
+    isSent ? 'Sent to Luis' : (ready ? 'Ready to send' : 'After step 1')
+  ];
+  document.querySelectorAll('#steps li').forEach((li, i) => {
+    const d = done[i] && (i !== 1 || ready);
+    li.className = d ? 'done' : (isSent ? '' : (i + 1 === cur ? 'now' : ''));
+    li.querySelector('small').textContent = sub[i];
+    if (i + 1 === cur && !isSent) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+  });
+  document.getElementById('stepnow').textContent = isSent ? 'All done. Your choices are with Luis.' : 'Step ' + cur + ' of 3';
+  const rd = document.getElementById('ready');
+  const missing = [!state.out ? 'your flight to Boston' : '', !state.ret ? 'your flight home' : ''].filter(Boolean);
+  rd.className = 'ready' + (ready ? '' : ' wait');
+  rd.hidden = isSent;
+  rd.textContent = ready ? 'Both flights chosen. Check the list, then confirm.' : 'Still needed: ' + missing.join(' and ') + '.';
+  document.getElementById('goTotal').textContent = money(total);
+  goReady = ready && !isSent; updateBar();
+}
+let goReady = false, sendInView = false;
+function updateBar() { const g = document.getElementById('gobar'); g.hidden = !(goReady && !sendInView); document.querySelector('.wrap').style.paddingBottom = g.hidden ? '' : '104px'; }
+document.getElementById('jump').addEventListener('click', () => document.getElementById('sec-send').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+try { new IntersectionObserver(es => { sendInView = es[0].isIntersecting; updateBar(); }, { threshold: 0.15 }).observe(document.getElementById('sec-send')); } catch (e) {}
+document.getElementById('again').addEventListener('click', () => { sentSig = ''; renderAll(); document.getElementById('sec-plans').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 document.getElementById('note').addEventListener('input', renderAll);
 document.getElementById('copy').addEventListener('click', async () => {
   const st = document.getElementById('status');
@@ -1019,7 +525,7 @@ const FORM = {
   ENTRY: { out: 758327712, home: 995125082, total: 1806010470, bags: 1227054406, seats: 876429359, note: 811722676, full: 402968477 },
 };
 let sending = false;
-const choiceLine = f => `${dayOf(f)} · ${flightLine(f)} · ${f.cabin} · ${money(f.price)}`;
+const choiceLine = f => flightLine(f);
 document.getElementById('send').addEventListener('click', async () => {
   const st = document.getElementById('status');
   if (!state.out || !state.ret || sending) return;
@@ -1035,7 +541,13 @@ document.getElementById('send').addEventListener('click', async () => {
   put('full', message());
   try {
     await fetch('https://docs.google.com/forms/d/e/' + FORM.ID + '/formResponse', { method: 'POST', mode: 'no-cors', body });
-    st.textContent = 'Sent to Luis. He will confirm with you before booking. If you do not hear back, tap Copy and message him.';
+    st.textContent = '';
+    sentSig = sigNow(); sentBefore = true;
+    sending = false; renderAll();
+    const sp = document.getElementById('sent'); sp.classList.add('show');
+    sp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('sentTitle').focus({ preventScroll: true });
+    return;
   } catch (e) {
     st.textContent = 'Could not send. Check your connection, or tap Copy and message Luis.';
   }
@@ -1043,6 +555,30 @@ document.getElementById('send').addEventListener('click', async () => {
 });
 
 renderDays(); fillSelect('out', 'sat24'); fillSelect('ret', 'wed28'); renderAll();
+</script>
+
+<script>
+/* sticky nav: highlight the section in view. Fails gracefully: the links still scroll without it. */
+(function () {
+  try {
+    var links = [].slice.call(document.querySelectorAll('#secnav a'));
+    var secs = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    if (!links.length || !secs.length) return;
+    function act() {
+      var y = window.innerHeight * 0.3, cur = null;
+      secs.forEach(function (s) { if (s.getBoundingClientRect().top <= y) cur = s.id; });
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) cur = secs[secs.length - 1].id;
+      links.forEach(function (l) {
+        var on = cur !== null && l.getAttribute('href') === '#' + cur;
+        l.classList.toggle('on', on);
+        if (on) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current');
+      });
+    }
+    window.addEventListener('scroll', act, { passive: true });
+    window.addEventListener('resize', act);
+    act();
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
