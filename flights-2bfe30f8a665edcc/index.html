@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ClioCon Flight Picker</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --card: #ffffff; --ink: #1f2937; --muted: #5b6472; --line: #e5e7eb;
+    --accent: #2f5fd0; --accent-soft: #eef3ff; --good: #1f7a4d; --good-soft: #eaf6ef;
+    --warn: #8a5200; --warn-soft: #fff4e0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 1.15rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .draft { display: inline-block; background: var(--warn-soft); color: var(--warn); border-radius: 999px; padding: 2px 10px; font-size: .78rem; font-weight: 600; margin-bottom: 10px; }
+  .block { margin-bottom: 28px; }
+  .step { background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: .8rem; border-radius: 999px; padding: 2px 10px; margin-right: 8px; vertical-align: middle; }
+  .lead { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
+
+  /* plans */
+  .plans { display: grid; gap: 12px; }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+  .plan.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .plan-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .plan-name { font-weight: 700; font-size: 1.05rem; }
+  .plan-price { font-weight: 700; font-size: 1.3rem; color: var(--good); }
+  .plan-price small { color: var(--muted); font-weight: 500; font-size: .75rem; }
+  .plan p { margin: 2px 0 8px; color: var(--muted); font-size: .9rem; }
+  .plan ul { list-style: none; padding: 0; margin: 0 0 12px; font-size: .92rem; }
+  .plan li { padding: 3px 0; }
+  .plan li b { display: inline-block; min-width: 62px; }
+  .plan .caution { color: var(--warn); font-size: .85rem; margin: 0 0 10px; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 10px; padding: 12px 16px; background: var(--accent); color: #fff; cursor: pointer; }
+  button.ghost { background: #fff; color: var(--accent); border: 1px solid #b9c7ee; }
+  button:disabled { background: #c9d1e4; color: #fff; cursor: not-allowed; }
+  .plan button { width: 100%; }
+
+  /* build your own */
+  section.leg { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .route { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
+  .days { display: flex; gap: 8px; margin-bottom: 12px; }
+  .days button { flex: 1; background: #fff; color: var(--ink); border: 1px solid #cfd4dc; }
+  .days button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .daynote { color: var(--warn); font-size: .85rem; margin: -4px 0 12px; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
+  select { width: 100%; font: inherit; color: var(--ink); background: #fff; border: 1px solid #cfd4dc; border-radius: 10px; padding: 12px 40px 12px 12px; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; }
+  select:focus, textarea:focus, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .detail { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfd; padding: 14px; }
+  .detail.empty { color: var(--muted); font-style: italic; text-align: center; padding: 18px 14px; }
+  .d-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .d-airline { font-weight: 700; }
+  .d-flight { color: var(--muted); font-size: .88rem; }
+  .price { font-size: 1.4rem; font-weight: 700; color: var(--good); line-height: 1.1; text-align: right; }
+  .price small { display: block; font-size: .72rem; color: var(--muted); font-weight: 500; }
+  .times { display: flex; align-items: center; gap: 12px; margin: 14px 0; }
+  .t b { font-size: 1.25rem; display: block; line-height: 1.2; }
+  .t span { color: var(--muted); font-size: .82rem; }
+  .bar { flex: 1; height: 2px; background: var(--line); position: relative; min-width: 36px; }
+  .bar i { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #fcfcfd; padding: 0 8px; font-style: normal; font-size: .78rem; color: var(--muted); white-space: nowrap; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 20px; margin: 0; }
+  .grid dt { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .grid dd { margin: 0; font-weight: 500; font-size: .92rem; }
+  .more { margin-top: 10px; font-size: .88rem; color: var(--muted); }
+  .more summary { cursor: pointer; color: var(--accent); }
+  .more dl { margin-top: 8px; }
+  .seatbox { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .9rem; border: 1px solid var(--line); }
+  .seatbox b { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+  .seatbox small { display: block; color: var(--muted); margin-top: 4px; font-size: .78rem; }
+  .seatbox.ok { background: var(--good-soft); border-color: #cfe8da; }
+  .seatbox.ok b { color: var(--good); }
+  .seatbox.tight { background: var(--warn-soft); border-color: #f3dcae; }
+  .seatbox.tight b { color: var(--warn); }
+  .seatbox.unknown { background: #f4f5f7; }
+  .seatbox.unknown b { color: var(--muted); }
+  .plan .seatline { font-size: .85rem; margin: 0 0 10px; color: var(--muted); }
+  .chips { margin-top: 10px; }
+  .chip { display: inline-block; font-size: .78rem; padding: 2px 9px; border-radius: 999px; margin: 4px 6px 0 0; background: var(--warn-soft); color: var(--warn); }
+
+  /* questions */
+  .q { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .q p { margin: 0 0 8px; font-weight: 600; font-size: .95rem; }
+  .q small { display: block; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .opts button { background: #fff; color: var(--ink); border: 1px solid #cfd4dc; padding: 10px 14px; }
+  .opts button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+  /* faq */
+  .faq details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+  .faq summary { cursor: pointer; font-weight: 600; font-size: .95rem; }
+  .faq p { margin: 8px 0 0; font-size: .92rem; color: var(--muted); }
+
+  /* summary */
+  .summary { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .summary ul { margin: 8px 0 12px; padding: 0; list-style: none; }
+  .summary li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .93rem; }
+  .summary li span:last-child { text-align: right; color: var(--muted); }
+  .total { display: flex; justify-content: space-between; font-weight: 700; padding: 10px 0 12px; }
+  textarea { width: 100%; font: inherit; border: 1px solid #cfd4dc; border-radius: 10px; padding: 12px; margin-bottom: 12px; min-height: 64px; resize: vertical; }
+  .send { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+  .send a { text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 600; border-radius: 10px; padding: 12px 16px; }
+  .send a[aria-disabled="true"] { background: #c9d1e4; pointer-events: none; }
+  .status { color: var(--good); font-size: .88rem; min-height: 1.3em; margin: 8px 0 0; }
+  .foot { color: var(--muted); font-size: .8rem; margin-top: 12px; }
+  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } .send { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Hi Jeff, choose your flights</h1>
+  <p class="sub">Flights between San Diego and Boston for you and Alex (ClioCon, Oct 24–28). You are choosing for both of you. Prices are totals for two, as shown on Google Flights on Oct 8.</p>
+
+  <div class="block">
+    <h2><span class="step">Start here</span>Pick a ready-made plan</h2>
+    <p class="lead">Each plan is a nonstop round trip. Seat selection is included unless noted. Tap a plan, then change any flight below if you like.</p>
+    <div class="plans" id="plans"></div>
+  </div>
+
+  <div class="block">
+    <h2><span class="step">Or</span>Build your own</h2>
+    <p class="lead">Each list is grouped by cabin, cheapest first.</p>
+    <section class="leg" id="leg-out">
+      <h2>Flight to Boston</h2>
+      <p class="route">San Diego (SAN) → Boston (BOS)</p>
+      <div class="days" id="days"></div>
+      <div class="daynote" id="daynote"></div>
+      <label for="sel-out">Choose a flight</label>
+      <select id="sel-out"></select>
+      <div class="detail empty" id="det-out">Choose a flight to see its details.</div>
+    </section>
+    <section class="leg" id="leg-ret">
+      <h2>Flight home (Wed, Oct 28)</h2>
+      <p class="route">Boston (BOS) → San Diego (SAN)</p>
+      <label for="sel-ret">Choose a flight</label>
+      <select id="sel-ret"></select>
+      <div class="detail empty" id="det-ret">Choose a flight to see its details.</div>
+    </section>
+  </div>
+
+  <div class="block">
+    <h2><span class="step">Two quick questions</span></h2>
+    <div class="q" data-q="bags">
+      <p>How many checked bags each?<small>On economy fares the first checked bag is $45 each. The price of a second bag is not checked yet. Luis adds bags when booking.</small></p>
+      <div class="opts"><button type="button">None</button><button type="button">1 each</button><button type="button">2 each</button></div>
+    </div>
+    <div class="q" data-q="seats">
+      <p>Seats: you on the aisle, Alex across the aisle from you?<small>Luis will request this when booking. An aisle seat is not guaranteed.</small></p>
+      <div class="opts"><button type="button">Yes</button><button type="button">Something else</button></div>
+    </div>
+  </div>
+
+  <div class="block faq">
+    <h2>Before you send</h2>
+    <details><summary>What does the price include?</summary><p>Taxes and fees for both of you, as shown on Google Flights on Oct 8. Luis confirms the final price before booking.</p></details>
+    <details><summary>Should I decide soon?</summary><p>Prices can change. Google flagged some Oct 28 fares as likely to go up within a day. Alaska economy seats looked open on Oct 8. Delta seat maps were not checked, and JetBlue’s Oct 24 economy seats were nearly full.</p></details>
+    <details><summary>How many seats are open?</summary><p>On Oct 8, Alaska had about 100 of 178 seats open on every flight checked, with 14 to 32 side-by-side pairs in Main and aisle seats in about half of them. JetBlue Main on Oct 24 was nearly full (1 of 68 open). Delta and most of Southwest were not checked. Each flight card shows its own numbers. This is a one-time snapshot, not a hold on any seat.</p></details>
+    <details><summary>Can we sit together?</summary><p>Every economy and premium economy fare here includes free seat selection, so Luis can choose your seats when booking. An aisle seat is not guaranteed. First class is marked where seat selection is not confirmed.</p></details>
+    <details><summary>What about bags?</summary><p>One carry-on each is free. On economy fares the first checked bag is $45 each. Where checked, First class and Mint include two checked bags each. The price of a second bag was not checked.</p></details>
+    <details><summary>Can we change or cancel?</summary><p>Not checked yet. Google lists Alaska Main as changeable (a fare difference may apply) with no refunds. Luis will confirm each airline’s rules before booking.</p></details>
+    <details><summary>Why do some flights say “overnight”?</summary><p>Evening flights from San Diego land in Boston between 5:00 and 6:35 a.m. the next day. The hotel is booked from Saturday, Oct 24.</p></details>
+    <details><summary>What happens after I send?</summary><p>Luis checks that the prices and seats are still available, books both tickets, and sends you the confirmations. You do not pay or enter any details on this page.</p></details>
+  </div>
+
+  <div class="summary">
+    <h2>Your choices</h2>
+    <ul id="sumList"></ul>
+    <div class="total"><span>Total for both</span><span id="sumTotal">$0</span></div>
+    <label for="note">Note for Luis (optional)</label>
+    <textarea id="note" placeholder="Anything else Luis should know"></textarea>
+    <div class="send">
+      <button id="send" type="button" disabled>Confirm my choices</button>
+      <button id="copy" type="button" class="ghost" disabled>Copy my choices</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+    <p class="foot">Choose both flights to turn on these buttons. Confirming sends your choices to Luis. Nothing is booked until Luis books it. To change your mind, confirm again and Luis will use the latest.</p>
+  </div>
+</div>
+
+<script>
+const FLIGHTS = [
+ {
+  "id": "F01",
+  "leg": "sat24",
+  "airline": "Alaska",
+  "flight": "AS 255",
+  "dep": "8:34 PM",
+  "arr": "5:21 AM",
+  "nextDay": 1,
+  "dur": "5h 47m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 411,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F02",
+  "leg": "sat24",
+  "airline": "Delta",
+  "flight": "DL 571",
+  "dep": "9:53 PM",
+  "arr": "6:35 AM",
+  "nextDay": 1,
+  "dur": "5h 42m",
+  "cabin": "Economy",
+  "fare": "Main Classic",
+  "price": 407,
+  "aircraft": "Airbus A321neo",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F03",
+  "leg": "sat24",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "8:15 AM",
+  "arr": "5:07 PM",
+  "nextDay": 0,
+  "dur": "5h 52m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 521,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F04",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 2120",
+  "dep": "8:20 PM",
+  "arr": "5:26 AM",
+  "nextDay": 1,
+  "dur": "6h 06m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 507,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F05",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 2120",
+  "dep": "8:20 PM",
+  "arr": "5:26 AM",
+  "nextDay": 1,
+  "dur": "6h 06m",
+  "cabin": "Premium Economy",
+  "fare": "Even More",
+  "price": 925,
+  "aircraft": "Airbus A320",
+  "legroom": "37 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F06",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 220",
+  "dep": "2:45 PM",
+  "arr": "11:57 PM",
+  "nextDay": 0,
+  "dur": "6h 12m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 727,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "Often delayed 30+ min",
+  "rise": 0
+ },
+ {
+  "id": "F07",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 220",
+  "dep": "2:45 PM",
+  "arr": "11:57 PM",
+  "nextDay": 0,
+  "dur": "6h 12m",
+  "cabin": "Premium Economy",
+  "fare": "Even More",
+  "price": 1145,
+  "aircraft": "Airbus A320",
+  "legroom": "37 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "Often delayed 30+ min",
+  "rise": 0
+ },
+ {
+  "id": "N1",
+  "leg": "sat24",
+  "airline": "Southwest",
+  "flight": "WN 4440",
+  "dep": "11:40 AM",
+  "arr": "8:15 PM",
+  "nextDay": 0,
+  "dur": "5h 35m",
+  "cabin": "Economy",
+  "fare": "Choice",
+  "price": 507,
+  "aircraft": "Boeing 737-700",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "No outlets listed",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F08",
+  "leg": "sun25",
+  "airline": "Alaska",
+  "flight": "AS 255",
+  "dep": "8:41 PM",
+  "arr": "5:28 AM",
+  "nextDay": 1,
+  "dur": "5h 47m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 567,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F09",
+  "leg": "sun25",
+  "airline": "Delta",
+  "flight": "DL 571",
+  "dep": "9:53 PM",
+  "arr": "6:35 AM",
+  "nextDay": 1,
+  "dur": "5h 42m",
+  "cabin": "Economy",
+  "fare": "Main Classic",
+  "price": 547,
+  "aircraft": "Airbus A321neo",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F10",
+  "leg": "sun25",
+  "airline": "JetBlue",
+  "flight": "B6 2120",
+  "dep": "8:26 PM",
+  "arr": "5:00 AM",
+  "nextDay": 1,
+  "dur": "5h 34m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 593,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F11",
+  "leg": "sun25",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "8:15 AM",
+  "arr": "5:07 PM",
+  "nextDay": 0,
+  "dur": "5h 52m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 761,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F12",
+  "leg": "sun25",
+  "airline": "Southwest",
+  "flight": "WN 765",
+  "dep": "3:00 PM",
+  "arr": "11:35 PM",
+  "nextDay": 0,
+  "dur": "5h 35m",
+  "cabin": "Economy",
+  "fare": "Choice",
+  "price": 777,
+  "aircraft": "Boeing 737 MAX 8",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "USB outlet only",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F13",
+  "leg": "sun25",
+  "airline": "JetBlue",
+  "flight": "B6 220",
+  "dep": "2:07 PM",
+  "arr": "11:00 PM",
+  "nextDay": 0,
+  "dur": "5h 53m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 860,
+  "aircraft": "Airbus A320",
+  "legroom": "32 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "Often delayed 30+ min",
+  "rise": 0
+ },
+ {
+  "id": "F14",
+  "leg": "sun25",
+  "airline": "JetBlue",
+  "flight": "B6 620",
+  "dep": "11:41 AM",
+  "arr": "8:29 PM",
+  "nextDay": 0,
+  "dur": "5h 48m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 1312,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "Often delayed 30+ min",
+  "rise": 0
+ },
+ {
+  "id": "F15",
+  "leg": "wed28",
+  "airline": "Delta",
+  "flight": "DL 571",
+  "dep": "5:10 PM",
+  "arr": "8:28 PM",
+  "nextDay": 0,
+  "dur": "6h 18m",
+  "cabin": "Economy",
+  "fare": "Main Classic",
+  "price": 367,
+  "aircraft": "Airbus A321neo",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "Often delayed 30+ min",
+  "rise": 1
+ },
+ {
+  "id": "F16",
+  "leg": "wed28",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "6:14 PM",
+  "arr": "9:35 PM",
+  "nextDay": 0,
+  "dur": "6h 21m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 309,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F17",
+  "leg": "wed28",
+  "airline": "Alaska",
+  "flight": "AS 256",
+  "dep": "7:51 AM",
+  "arr": "11:09 AM",
+  "nextDay": 0,
+  "dur": "6h 18m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 309,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "31 in",
+  "wifi": "Wi-Fi for a fee",
+  "power": "Power & USB",
+  "delay": "",
+  "rise": 0
+ },
+ {
+  "id": "F18",
+  "leg": "wed28",
+  "airline": "JetBlue",
+  "flight": "B6 619",
+  "dep": "7:00 AM",
+  "arr": "10:31 AM",
+  "nextDay": 0,
+  "dur": "6h 31m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 411,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 1
+ },
+ {
+  "id": "F19",
+  "leg": "wed28",
+  "airline": "JetBlue",
+  "flight": "B6 219",
+  "dep": "9:30 AM",
+  "arr": "12:56 PM",
+  "nextDay": 0,
+  "dur": "6h 26m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 411,
+  "aircraft": "Airbus A320",
+  "legroom": "32 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 1
+ },
+ {
+  "id": "F20",
+  "leg": "wed28",
+  "airline": "Southwest",
+  "flight": "WN 4382",
+  "dep": "10:35 AM",
+  "arr": "1:50 PM",
+  "nextDay": 0,
+  "dur": "6h 15m",
+  "cabin": "Economy",
+  "fare": "Choice",
+  "price": 383,
+  "aircraft": "Boeing 737",
+  "legroom": "31 in",
+  "wifi": "Free Wi-Fi",
+  "power": "USB outlet only",
+  "delay": "",
+  "rise": 1
+ },
+ {
+  "id": "N2",
+  "leg": "wed28",
+  "airline": "JetBlue",
+  "flight": "B6 319",
+  "dep": "3:50 PM",
+  "arr": "7:14 PM",
+  "nextDay": 0,
+  "dur": "6h 24m",
+  "cabin": "Economy",
+  "fare": "Main",
+  "price": 411,
+  "aircraft": "Airbus A320",
+  "legroom": "33 in",
+  "wifi": "Free Wi-Fi",
+  "power": "Power, USB & live TV",
+  "delay": "",
+  "rise": 1
+ },
+ {
+  "id": "P01",
+  "leg": "sat24",
+  "airline": "Alaska",
+  "flight": "AS 255",
+  "dep": "8:34 PM",
+  "arr": "5:21 AM",
+  "nextDay": 1,
+  "dur": "5h 47m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 1567,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Premium seat; seat selection not confirmed",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Free meal service, lounge access",
+  "note": "Legroom in inches not shown by Google"
+ },
+ {
+  "id": "P02",
+  "leg": "sat24",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "8:15 AM",
+  "arr": "5:07 PM",
+  "nextDay": 0,
+  "dur": "5h 52m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 2437,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Premium seat; seat selection not confirmed",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Free meal service, lounge access",
+  "note": ""
+ },
+ {
+  "id": "P03",
+  "leg": "sat24",
+  "airline": "Delta",
+  "flight": "DL 571",
+  "dep": "9:53 PM",
+  "arr": "6:35 AM",
+  "nextDay": 1,
+  "dur": "5h 42m",
+  "cabin": "First",
+  "fare": "First Classic",
+  "price": 3137,
+  "aircraft": "Airbus A321neo",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": true,
+  "seatLine": "Free seat selection",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Priority boarding (meal and lounge not confirmed)",
+  "note": ""
+ },
+ {
+  "id": "P04",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 2120",
+  "dep": "8:20 PM",
+  "arr": "5:26 AM",
+  "nextDay": 1,
+  "dur": "6h 06m",
+  "cabin": "Business (Mint)",
+  "fare": "Mint",
+  "price": 5171,
+  "aircraft": "Airbus A320",
+  "legroom": "Lie-flat seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": true,
+  "seatLine": "Free seat selection",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Free meal service",
+  "note": ""
+ },
+ {
+  "id": "P05",
+  "leg": "sat24",
+  "airline": "JetBlue",
+  "flight": "B6 220",
+  "dep": "2:45 PM",
+  "arr": "11:57 PM",
+  "nextDay": 0,
+  "dur": "6h 12m",
+  "cabin": "Business (Mint)",
+  "fare": "Mint",
+  "price": 5611,
+  "aircraft": "Airbus A320",
+  "legroom": "Lie-flat seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "Often delayed 30+ min",
+  "freeSeat": false,
+  "seatLine": "Seat details not confirmed for this flight",
+  "bags": "Not confirmed for this flight",
+  "perks": "Same Mint fare family as B6 2120 (not read line by line)",
+  "note": ""
+ },
+ {
+  "id": "P06",
+  "leg": "sun25",
+  "airline": "Delta",
+  "flight": "DL 571",
+  "dep": "9:53 PM",
+  "arr": "6:35 AM",
+  "nextDay": 1,
+  "dur": "5h 42m",
+  "cabin": "First",
+  "fare": "First Classic",
+  "price": 1507,
+  "aircraft": "Airbus A321neo",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": true,
+  "seatLine": "Free seat selection",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Priority boarding (meal and lounge not confirmed)",
+  "note": ""
+ },
+ {
+  "id": "P07",
+  "leg": "sun25",
+  "airline": "Alaska",
+  "flight": "AS 255",
+  "dep": "8:41 PM",
+  "arr": "5:28 AM",
+  "nextDay": 1,
+  "dur": "5h 47m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 1571,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Premium seat; seat selection not confirmed",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Free meal service, lounge access",
+  "note": ""
+ },
+ {
+  "id": "P08",
+  "leg": "sun25",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "8:15 AM",
+  "arr": "5:07 PM",
+  "nextDay": 0,
+  "dur": "5h 52m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 2437,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Standard recliner seat",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Premium seat; seat selection not confirmed",
+  "bags": "1 carry-on and 2 checked bags free, each",
+  "perks": "Free meal service, lounge access",
+  "note": ""
+ },
+ {
+  "id": "P09",
+  "leg": "wed28",
+  "airline": "Alaska",
+  "flight": "AS 256",
+  "dep": "7:51 AM",
+  "arr": "11:09 AM",
+  "nextDay": 0,
+  "dur": "6h 18m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 1567,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Not checked",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Not checked",
+  "bags": "Not checked",
+  "perks": "Not checked (price seen in Google fare panel only)",
+  "note": "Oct 28 first class was not fully searched"
+ },
+ {
+  "id": "P10",
+  "leg": "wed28",
+  "airline": "Alaska",
+  "flight": "AS 389",
+  "dep": "6:14 PM",
+  "arr": "9:35 PM",
+  "nextDay": 0,
+  "dur": "6h 21m",
+  "cabin": "First",
+  "fare": "First",
+  "price": 3807,
+  "aircraft": "Boeing 737 MAX 9",
+  "legroom": "Not checked",
+  "wifi": "Not checked",
+  "power": "Not checked",
+  "delay": "",
+  "freeSeat": false,
+  "seatLine": "Not checked",
+  "bags": "Not checked",
+  "perks": "Not checked (price seen in Google fare panel only)",
+  "note": "Oct 28 first class was not fully searched"
+ }
+];
+
+const DAYS = {
+  sat24: { label: 'Sat, Oct 24', note: '' },
+  sun25: { label: 'Sun, Oct 25', note: 'The hotel is booked from Saturday. The partner summit is Sunday, noon to 5 p.m. Every Sunday flight lands after it starts.' },
+};
+const PLANS = [
+  { id: 'low',   name: 'Lowest price',   blurb: 'Alaska both ways, at a low fare with seat selection.', out: 'F01', ret: 'F16', caution: 'The flight to Boston is overnight. It lands at 5:21 a.m.' },
+  { id: 'day',   name: 'Daytime flights', blurb: 'Alaska both ways, with no overnight flight.', out: 'F03', ret: 'F16', caution: '' },
+  { id: 'first', name: 'First class',    blurb: 'Alaska First both ways.', out: 'P01', ret: 'P09', caution: 'Seat selection is not confirmed. The flight home was not fully checked.' },
+];
+
+// Source: Seat-Availability-Check-2026-10-08.md (one-time snapshot on Oct 8; seat maps change without notice).
+const SEATS = {
+  F01: ['ok', 'Alaska Main: 35 seats open. 14 side-by-side pairs, 8 of them with an aisle seat.'],
+  F08: ['ok', 'Alaska Main: 41 seats open. 21 side-by-side pairs, 12 of them with an aisle seat.'],
+  F16: ['ok', 'Alaska Main: 56 seats open. 32 side-by-side pairs, 15 of them with an aisle seat.'],
+  F17: ['ok', 'Alaska Main: 56 seats open. 30 side-by-side pairs, 14 of them with an aisle seat.'],
+  F04: ['tight', 'JetBlue Main: only 1 of 68 seats open, so two seats together are not available.'],
+  F05: ['ok', 'JetBlue Even More: 16 of 30 seats open. Side-by-side pairs not counted.'],
+  F10: ['tight', 'JetBlue Main: 9 of 68 seats open. Side-by-side pairs not counted.'],
+  F18: ['ok', 'JetBlue Main: 46 of 68 seats open. Side-by-side pairs not counted.'],
+  N1:  ['unknown', 'Southwest says most standard seats are already reserved and assigned at check-in. Only part of the seat map was read.'],
+  F02: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
+  F09: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
+  F15: ['unknown', 'Delta seat map not checked (Delta’s site would not open it).'],
+  P01: ['ok', 'Alaska First: 10 seats open. Alaska shows “last 5 seats” at this price.'],
+  P07: ['ok', 'Alaska First: 13 seats open. No “last seats” warning.'],
+  P09: ['ok', 'Alaska First: 9 seats open. Alaska shows “last 4 seats” at this price.'],
+  P10: ['tight', 'Alaska First: 4 seats open. Alaska shows “last 4 seats” at this price.'],
+  P04: ['tight', 'JetBlue Mint: 2 of 16 seats open. JetBlue shows “2 left at this price”.'],
+  P06: ['unknown', 'Delta shows “3 left at this price”. Seat map not checked.'],
+};
+const seatInfo = f => SEATS[f.id] || ['unknown', 'Seat availability not checked for this flight.'];
+const SEATWORD = { ok: 'plenty open', tight: 'tight', unknown: 'not checked' };
+const money = n => '$' + n.toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const byId = id => FLIGHTS.find(f => f.id === id);
+const state = { out: null, ret: null, day: 'sat24', bags: '', seats: '' };
+
+function flightLine(f) { return `${f.airline} ${f.flight} · ${f.dep} → ${f.arr}${f.nextDay ? ' +1' : ''}`; }
+function dayOf(f) { return f.leg === 'wed28' ? 'Wed, Oct 28' : DAYS[f.leg].label; }
+
+/* plans */
+const plansEl = document.getElementById('plans');
+function renderPlans() {
+  plansEl.innerHTML = PLANS.map(p => {
+    const o = byId(p.out), r = byId(p.ret);
+    const on = state.out === o && state.ret === r;
+    return `<div class="plan ${on ? 'on' : ''}">
+      <div class="plan-top"><span class="plan-name">${p.name}</span><span class="plan-price">${money(o.price + r.price)} <small>both ways, total for 2</small></span></div>
+      <p>${p.blurb}</p>
+      <ul><li><b>${dayOf(o)}</b> ${esc(flightLine(o))}</li><li><b>${dayOf(r)}</b> ${esc(flightLine(r))}</li></ul>
+      <div class="seatline">Seats open: ${SEATWORD[seatInfo(o)[0]]} to Boston, ${SEATWORD[seatInfo(r)[0]]} home.</div>
+      ${p.caution ? `<div class="caution">${p.caution}</div>` : ''}
+      <button type="button" data-plan="${p.id}">${on ? 'Selected' : 'Use this plan'}</button>
+    </div>`;
+  }).join('');
+}
+plansEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-plan]'); if (!b) return;
+  const p = PLANS.find(x => x.id === b.dataset.plan);
+  choose('out', byId(p.out)); choose('ret', byId(p.ret));
+});
+
+/* build your own */
+function optionLabel(f) {
+  const cab = f.cabin === 'Economy' ? '' : ' · ' + f.cabin;
+  return `${money(f.price)} · ${f.airline} ${f.flight} · ${f.dep} → ${f.arr}${f.nextDay ? ' +1' : ''}${cab}`;
+}
+function groupHtml(opts) {
+  const groups = [['Economy', f => f.cabin === 'Economy'], ['Premium economy', f => f.cabin === 'Premium Economy'], ['First and business', f => /First|Business/.test(f.cabin)]];
+  return groups.map(([name, test]) => {
+    const g = opts.filter(test); if (!g.length) return '';
+    return `<optgroup label="${name}">${g.map(f => `<option value="${f.id}">${esc(optionLabel(f))}</option>`).join('')}</optgroup>`;
+  }).join('');
+}
+function legFlights(key) { return FLIGHTS.filter(f => f.leg === key).sort((a, b) => a.price - b.price); }
+function fillSelect(which, key) {
+  const sel = document.getElementById('sel-' + which);
+  sel.innerHTML = `<option value="">Choose a flight…</option>` + groupHtml(legFlights(key));
+  sel.value = state[which] && state[which].leg === key ? state[which].id : '';
+}
+function detailHtml(f, from, to) {
+  const seat = f.seatLine || 'Free seat selection';
+  const bags = f.bags || '1 carry-on free, first checked bag $45 each';
+  const warns = [];
+  if (f.nextDay) warns.push('Overnight, lands next day');
+  if (f.delay) warns.push(f.delay);
+  if (f.note) warns.push(f.note);
+  if (f.rise) warns.push('Google says this price may go up within a day');
+  return `
+    <div class="d-top">
+      <div><div class="d-airline">${esc(f.airline)}</div><div class="d-flight">${esc(f.flight)} · Nonstop · ${esc(f.cabin === f.fare ? f.cabin : f.cabin + ' · ' + f.fare)}</div></div>
+      <div class="price">${money(f.price)}<small>total for 2</small></div>
+    </div>
+    <div class="times">
+      <div class="t"><b>${f.dep}</b><span>${from}</span></div>
+      <div class="bar"><i>${f.dur}</i></div>
+      <div class="t" style="text-align:right"><b>${f.arr}${f.nextDay ? ' <sup>+1</sup>' : ''}</b><span>${to}</span></div>
+    </div>
+    <dl class="grid">
+      <div><dt>Seats</dt><dd>${esc(seat)}</dd></div>
+      <div><dt>Bags</dt><dd>${esc(bags)}</dd></div>
+      <div><dt>Legroom</dt><dd>${esc(f.legroom)}</dd></div>${f.perks ? `<div><dt>Included</dt><dd>${esc(f.perks)}</dd></div>` : ''}
+    </dl>
+    <div class="seatbox ${seatInfo(f)[0]}"><b>Seats open for you and Alex</b>${esc(seatInfo(f)[1])}<small>Snapshot from Oct 8. Seat maps change without notice.</small></div>
+    <details class="more"><summary>More details</summary>
+      <dl class="grid"><div><dt>Aircraft</dt><dd>${esc(f.aircraft)}</dd></div><div><dt>Wi-Fi</dt><dd>${esc(f.wifi)}</dd></div><div><dt>Power</dt><dd>${esc(f.power)}</dd></div></dl>
+    </details>
+    ${warns.length ? `<div class="chips">${warns.map(w => `<span class="chip">${esc(w)}</span>`).join('')}</div>` : ''}`;
+}
+const AIR = { SAN: 'San Diego', BOS: 'Boston' };
+function renderDetail(which) {
+  const f = state[which], det = document.getElementById('det-' + which);
+  if (!f) { det.className = 'detail empty'; det.textContent = 'Choose a flight to see its details.'; return; }
+  det.className = 'detail';
+  det.innerHTML = which === 'out' ? detailHtml(f, 'San Diego', 'Boston') : detailHtml(f, 'Boston', 'San Diego');
+}
+function choose(which, f) {
+  state[which] = f;
+  if (which === 'out') { state.day = f.leg; renderDays(); fillSelect('out', f.leg); }
+  else fillSelect('ret', 'wed28');
+  renderDetail(which); renderAll();
+}
+function renderDays() {
+  const el = document.getElementById('days');
+  el.innerHTML = Object.keys(DAYS).map(k => `<button type="button" data-day="${k}" class="${state.day === k ? 'on' : ''}">${DAYS[k].label}</button>`).join('');
+  document.getElementById('daynote').textContent = DAYS[state.day].note;
+}
+document.getElementById('days').addEventListener('click', e => {
+  const b = e.target.closest('button[data-day]'); if (!b) return;
+  state.day = b.dataset.day;
+  if (state.out && state.out.leg !== state.day) { state.out = null; renderDetail('out'); }
+  renderDays(); fillSelect('out', state.day); renderAll();
+});
+['out', 'ret'].forEach(which => document.getElementById('sel-' + which).addEventListener('change', e => {
+  const f = byId(e.target.value);
+  if (f) choose(which, f); else { state[which] = null; renderDetail(which); renderAll(); }
+}));
+
+/* questions */
+document.querySelectorAll('.q').forEach(q => q.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state[q.dataset.q] = b.textContent;
+  q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  renderAll();
+}));
+
+/* summary + send */
+function message() {
+  const lines = ['Hi Luis, my flight choices for me and Alex:', ''];
+  lines.push(`To Boston: ${dayOf(state.out)} · ${flightLine(state.out)} · ${state.out.cabin} · ${money(state.out.price)}`);
+  lines.push(`Home: ${dayOf(state.ret)} · ${flightLine(state.ret)} · ${state.ret.cabin} · ${money(state.ret.price)}`);
+  lines.push(`Total for both: ${money(state.out.price + state.ret.price)}`);
+  lines.push('', `Checked bags each: ${state.bags || 'not answered'}`, `Seats (me aisle, Alex across the aisle): ${state.seats || 'not answered'}`);
+  const note = document.getElementById('note').value.trim();
+  if (note) lines.push('', 'Note: ' + note);
+  lines.push('', 'Thanks, Jeff');
+  return lines.join('\n');
+}
+function renderAll() {
+  renderPlans();
+  const rows = [['To Boston', state.out], ['Home, Wed, Oct 28', state.ret]];
+  document.getElementById('sumList').innerHTML = rows.map(([t, f]) =>
+    `<li><span>${f && t === 'To Boston' ? dayOf(f) : t}</span><span>${f ? esc(f.airline + ' ' + f.flight) + ' · ' + money(f.price) : 'not chosen yet'}</span></li>`).join('');
+  const total = (state.out ? state.out.price : 0) + (state.ret ? state.ret.price : 0);
+  document.getElementById('sumTotal').textContent = money(total);
+  const ready = !!(state.out && state.ret);
+  document.getElementById('send').disabled = !ready || sending;
+  document.getElementById('copy').disabled = !ready;
+}
+document.getElementById('note').addEventListener('input', renderAll);
+document.getElementById('copy').addEventListener('click', async () => {
+  const st = document.getElementById('status');
+  try { await navigator.clipboard.writeText(message()); st.textContent = 'Copied. Paste it into a message to Luis.'; }
+  catch (e) { st.textContent = 'Could not copy. Use Confirm my choices instead.'; }
+});
+
+/* Sends one new row to the Google Form (answers land in Luis's Sheet). no-cors: Google gives no readable reply,
+   so only a network failure can be detected. */
+const FORM = {
+  ID: '1FAIpQLSeo6nSr8nPlMkopNZqlasByuAYXqj-uWh-RmWGdRO4uZIsVEA',
+  ENTRY: { out: 758327712, home: 995125082, total: 1806010470, bags: 1227054406, seats: 876429359, note: 811722676, full: 402968477 },
+};
+let sending = false;
+const choiceLine = f => `${dayOf(f)} · ${flightLine(f)} · ${f.cabin} · ${money(f.price)}`;
+document.getElementById('send').addEventListener('click', async () => {
+  const st = document.getElementById('status');
+  if (!state.out || !state.ret || sending) return;
+  sending = true; renderAll(); st.textContent = 'Sending…';
+  const body = new FormData();
+  const put = (k, v) => body.append('entry.' + FORM.ENTRY[k], v);
+  put('out', choiceLine(state.out));
+  put('home', choiceLine(state.ret));
+  put('total', money(state.out.price + state.ret.price));
+  put('bags', state.bags || 'not answered');
+  put('seats', state.seats || 'not answered');
+  put('note', document.getElementById('note').value.trim());
+  put('full', message());
+  try {
+    await fetch('https://docs.google.com/forms/d/e/' + FORM.ID + '/formResponse', { method: 'POST', mode: 'no-cors', body });
+    st.textContent = 'Sent to Luis. He will confirm with you before booking. If you do not hear back, tap Copy and message him.';
+  } catch (e) {
+    st.textContent = 'Could not send. Check your connection, or tap Copy and message Luis.';
+  }
+  sending = false; renderAll();
+});
+
+renderDays(); fillSelect('out', 'sat24'); fillSelect('ret', 'wed28'); renderAll();
+</script>
+</body>
+</html>
