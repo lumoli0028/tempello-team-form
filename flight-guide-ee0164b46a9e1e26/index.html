@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light">
+<title>ClioCon flight booking guides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap">
+<style>
+
+:root {
+  color-scheme: light;
+  --bg: #fafaf8; --card: #ffffff; --line: #e3e5ea; --soft: #f3f5f9; --text: #161b26; --muted: #5d667a;
+  --blue: #1d4ed8; --green-bg: #e7f5ec; --green: #1d6b3d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding-bottom: 30px; }
+a { color: var(--blue); }
+b { font-weight: 700; }
+:focus-visible { outline: 3px solid #93b4ff; outline-offset: 2px; }
+
+.top { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 4; }
+.top-in { max-width: 1180px; margin: 0 auto; padding: 8px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.app-title { font-weight: 800; }
+.top-btns { display: flex; gap: 6px; }
+button.link { background: none; border: 0; color: var(--blue); font: inherit; text-decoration: underline; cursor: pointer; padding: 8px; min-height: 40px; }
+
+.intro-in, main { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+.intro-in { padding-top: 28px; padding-bottom: 8px; }
+.intro-in > * { max-width: 860px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.2; margin: 0 0 10px; }
+.big { font-size: 1.2rem; margin: 8px 0; }
+.small { font-size: .92rem; color: var(--muted); margin: 8px 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 14px 0; }
+.btn { display: inline-block; min-height: 52px; padding: 14px 26px; background: var(--blue); color: #fff; border: 2px solid var(--blue); border-radius: 12px; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; text-align: center; }
+.btn-secondary { background: #fff; color: var(--blue); }
+.group { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 26px 0 6px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 10px 0; }
+.card > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 12px 18px; min-height: 62px; cursor: pointer; }
+.card > summary::-webkit-details-marker { display: none; }
+.card > summary:hover { background: var(--soft); border-radius: 14px; }
+.title { font-size: 1.2rem; font-weight: 700; flex: 1; }
+.time { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); margin: 0 6px; transition: transform .15s; flex: none; }
+.card[open] > summary .chev { transform: rotate(45deg); }
+.badge { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--text); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; }
+.card.done .badge { background: var(--green); }
+.card.done .badge::after { content: "\2713"; margin-left: 2px; }
+.card.done .title { color: var(--muted); }
+.body { padding: 0 18px 14px; }
+
+.part { padding: 14px 0; border-top: 1px solid var(--line); }
+.part:first-child { border-top: 0; padding-top: 4px; }
+.part h3 { font-size: 1.05rem; margin: 0 0 6px; }
+.part-text p { margin: 8px 0; }
+@media (min-width: 900px) {
+  .part { display: grid; grid-template-columns: minmax(280px, 5fr) 7fr; gap: 24px; align-items: start; }
+  .part:not(:has(.shots)) { display: block; max-width: 760px; }
+}
+.shots { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+.shots figure { margin: 0; max-width: 100%; }
+figcaption { font-size: .83rem; color: var(--muted); margin-top: 4px; max-width: 60ch; }
+/* Every image is shown whole at its natural size: never cropped, never stretched */
+.shot { display: block; padding: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: zoom-in; max-width: 100%; }
+.shot img { display: block; width: auto; max-width: 100%; height: auto; }
+
+.check { background: var(--green-bg); color: #14532d; border-radius: 8px; padding: 8px 12px; }
+.rule { background: var(--soft); border-left: 4px solid var(--blue); border-radius: 6px; padding: 8px 12px; }
+.note { background: var(--soft); border-left: 4px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: .93rem; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 4px 0 10px; }
+.facts dt { color: var(--muted); } .facts dd { margin: 0; }
+.flights { padding-left: 1.2em; margin: 8px 0 0; } .flights li { margin: 3px 0; }
+.seat-main { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.route { font-weight: 700; flex: 1; }
+.seat-no { font-size: 2rem; font-weight: 800; color: var(--blue); line-height: 1; }
+.seat-cost { color: var(--muted); }
+.save { margin: 6px 0; padding-left: 1.2em; } .save li { margin: 4px 0; }
+table.price { width: 100%; max-width: 480px; border-collapse: collapse; }
+.price td { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.price .num { text-align: right; white-space: nowrap; }
+.price tr.total td { font-weight: 800; border-bottom: 0; }
+
+dialog { border: 0; border-radius: 12px; padding: 12px; max-width: 96vw; max-height: 94vh; background: #fff; }
+dialog::backdrop { background: rgba(0, 0, 0, .55); }
+dialog img { display: block; max-width: 100%; max-height: 82vh; margin: 10px auto 0; }
+dialog p { margin: 6px 0 0; font-size: .9rem; color: var(--muted); }
+@media (max-width: 640px) { .card > summary { padding: 10px 12px; } .body { padding: 0 12px 12px; } .btn { width: 100%; } .intro-in, main { padding: 0 12px; } .time { display: none; } }
+
+.tablewrap { overflow-x: auto; margin: 8px 0; }
+table.grid { width: 100%; border-collapse: collapse; font-size: .92rem; background: #fff; }
+.grid th, .grid td { text-align: left; padding: 7px 10px; border: 1px solid var(--line); vertical-align: top; }
+.grid thead th { background: var(--soft); font-weight: 700; white-space: nowrap; }
+.grid tbody th { background: var(--soft); white-space: nowrap; }
+
+@media (min-width: 900px) { .part.wide { display: block; } .part.wide .shots { margin-top: 12px; } }
+
+/* picture first, instructions underneath */
+.part.shotfirst { display: flex; flex-direction: column; gap: 12px; }
+.part.shotfirst .shots { order: -1; }
+.part.shotfirst .shot { max-width: 760px; }
+.part.shotfirst > * { flex: none; }
+
+/* Tempello brand: ink #0F1729, orange #F96706, paper #FAF9F7, panel #F1F2F4. Light only, solid orange accents. */
+:root { --ink: #0F1729; --orange: #F96706; --orange-dark: #C2540A; --orange-soft: #FFE7D6; --paper: #FAF9F7; --panel: #F1F2F4; --bg: #F1F2F4; --line: #CDD1D9; --soft: #F1F2F4; --blue: #C2540A; --text: #0F1729; --muted: #566074; }
+body { background: var(--bg); color: var(--ink); font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--orange-dark); }
+.top { background: #fff; border-bottom: 4px solid var(--orange); }
+.top-in { gap: 14px; }
+.logo { height: 26px; width: auto; display: block; }
+.app-title { color: var(--ink); font-weight: 700; flex: 1; }
+button.link { color: var(--orange-dark); }
+.intro-in { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin: 20px auto 0; padding: 22px 24px 16px; max-width: 1180px; }
+.intro-in > * { max-width: 860px; }
+h1 { font-weight: 900; color: var(--ink); letter-spacing: -.01em; }
+.group { color: var(--ink); font-weight: 900; border-bottom: 3px solid var(--orange); padding-bottom: 4px; }
+.btn { background: var(--orange); border-color: var(--orange); color: #fff; box-shadow: none; }
+.btn:hover { background: #E05A00; border-color: #E05A00; }
+.btn-secondary { background: #fff; color: var(--orange-dark); border-color: var(--orange); }
+.card { background: #fff; border: 1.5px solid var(--line); box-shadow: none; }
+.card[open] { border-color: var(--orange); }
+.card[open] > summary { background: var(--orange-soft); border-radius: 13px 13px 0 0; }
+.card > summary:hover { background: var(--orange-soft); }
+.title { font-weight: 700; }
+.badge { background: var(--orange); color: #fff; }
+.card.done .badge { background: #1d6b3d; }
+.chev { border-color: var(--ink); }
+.part h3 { color: var(--ink); font-weight: 900; }
+.check { background: #CFEEDB; border: 1px solid #94D3AB; color: #0F4727; }
+.rule { background: var(--orange); color: #fff; border: 0; border-radius: 10px; padding: 10px 14px; }
+.note { background: var(--panel); border-left: 4px solid var(--orange); }
+.grid thead th, .grid tbody th { background: var(--orange); color: #fff; border-color: var(--orange); }
+.grid th, .grid td { border-color: var(--line); }
+.seat-no { color: var(--orange-dark); font-weight: 900; }
+.shot { border: 1.5px solid #9AA2B1; }
+.price tr.total td { color: var(--orange-dark); }
+.disclaimer { font-size: .88rem; color: var(--ink); background: var(--orange-soft); border-radius: 8px; padding: 8px 12px; }
+dialog { background: #fff; }
+
+
+
+[hidden]{display:none!important}
+.fr{display:block;position:relative;line-height:0}
+.fr img{display:block;max-width:100%;height:auto}
+.hl{position:absolute;border:3px solid #f96706;border-radius:6px;box-shadow:0 0 0 2px #fff;pointer-events:none}
+.seatlist{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:8px 0}
+.seatlist dt{font-weight:700}.seatlist dd{margin:0}
+.warn{background:#fff;border:2px solid #f96706;border-radius:8px;padding:8px 12px}
+.pick-note{font-size:.95rem}
+.price-line{font-weight:800}
+ol.how{padding-left:1.3em;margin:6px 0}ol.how li{margin:4px 0}
+.shotcol{min-width:0}
+.swipe{display:none;font-size:.82rem;color:#5d667a;margin:6px 0 0}
+.band{display:flex;flex-direction:column;gap:2px;border-radius:12px;padding:12px 16px;margin:26px 0 8px}
+.band-label{font-size:.75rem;letter-spacing:.1em;font-weight:900}
+.band-title{font-size:1.1rem;font-weight:800;line-height:1.3}
+.band-sub{font-size:.9rem}
+.band.start.w-b{background:#f96706;color:#fff}
+.band.start.w-j{background:#1e4fa3;color:#fff}
+.band.start.w-o{background:#fff;border:2px solid #1e4fa3;color:#163a78;margin-top:22px}
+.band.end{background:#e7f5ec;border:2px solid #1d6b3d;color:#14532d;margin-top:8px}
+.band.end .band-label::before{content:"✓ "}
+.panel{--pc:#1e4fa3;--pbg:#f4f7fc;border:3px solid var(--pc);border-radius:18px;background:var(--pbg);margin:28px 0;overflow:hidden}
+.panel.p-b{--pc:#f96706;--pbg:#fff6ef}
+.panel.p-flight{--pc:#12244a;--pbg:#f3f6fb}
+.panel.p-opt{--pc:#1e4fa3;--pbg:#e6eefb;margin:22px 0}
+.panel-head{display:flex;gap:14px;align-items:center;background:var(--pc);color:#fff;padding:14px 18px}
+.panel-letter{flex:none;width:48px;height:48px;border-radius:50%;background:#fff;color:var(--pc);font-weight:900;font-size:1.6rem;display:flex;align-items:center;justify-content:center}
+.panel-headtext{display:flex;flex-direction:column;gap:2px;min-width:0}
+.panel-label{font-size:.75rem;letter-spacing:.1em;font-weight:900}
+.panel-title{font-size:1.2rem;font-weight:800;line-height:1.25}
+.panel-sub{font-size:.92rem}
+.panel-body{padding:14px 14px 6px}
+.panel-body > .card{background:#fff}
+.panel-foot{display:flex;flex-direction:column;gap:2px;margin:8px 14px 14px;background:#e7f5ec;border:2px solid #1d6b3d;color:#14532d;border-radius:12px;padding:10px 14px}
+.panel-foot .panel-label::before{content:"✓ "}
+.panel-foot .panel-title{font-size:1rem}
+.optpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:10px 0 12px}
+.optbtn{display:flex;gap:12px;align-items:center;text-align:left;background:#fff;border:2px solid #1e4fa3;border-radius:14px;padding:10px 14px;min-height:68px;font:inherit;color:#163a78;cursor:pointer}
+.optbtn .ol{flex:none;width:40px;height:40px;border-radius:50%;background:#1e4fa3;color:#fff;font-weight:900;font-size:1.3rem;display:flex;align-items:center;justify-content:center}
+.optbtn .ot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.optbtn small{font-size:.85rem;font-weight:500}
+.optbtn.on{background:#1e4fa3;color:#fff}
+.optbtn.on .ol{background:#fff;color:#1e4fa3}
+.closebtn{display:inline-flex;align-items:center;justify-content:center;margin:12px 0 4px;padding:0;width:48px;height:48px;background:#fff;border:2px solid #5d667a;border-radius:12px;color:#161b26;cursor:pointer}
+.closebtn:hover,.panel-close:hover{background:#eef1f6}
+.qa .q{margin:12px 0 2px}.qa .a{margin:0 0 6px}
+.card.faq{margin-top:26px}
+.badge{width:44px;height:44px}
+button.link{min-height:44px}
+.panel-close{display:flex;align-items:center;justify-content:center;margin-left:auto;flex:none;width:46px;height:46px;padding:0;background:#fff;color:var(--pc);border:0;border-radius:50%;cursor:pointer}
+.panel-headtext{flex:1}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.who-btn{display:flex;flex-direction:column;gap:2px;text-align:left;background:#fff;border:2px solid;border-radius:14px;padding:14px 18px;min-height:96px;cursor:pointer;font:inherit;color:#161b26}
+.who-btn .who-top{font-size:.72rem;letter-spacing:.1em;font-weight:700}
+.who-btn .who-name{font-size:1.6rem;font-weight:900;line-height:1.15}
+.who-btn .who-sub{font-size:.9rem}
+.who-btn.b{border-color:#f96706}.who-btn.b .who-top{color:#c4500a}
+.who-btn.j{border-color:#1e4fa3}.who-btn.j .who-top{color:#1e4fa3}
+.who-btn.b.on{background:#f96706;color:#fff}.who-btn.b.on .who-top{color:#fff}
+.who-btn.j.on{background:#1e4fa3;color:#fff}.who-btn.j.on .who-top{color:#fff}
+.banner{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;border-radius:14px;padding:16px 18px;margin:14px 0 6px}
+.banner-for{display:block;font-size:.72rem;letter-spacing:.1em;font-weight:700}
+.banner-who{display:block;font-size:1.7rem;font-weight:900;line-height:1.15}
+.banner-line{display:block;font-size:.95rem;margin-top:2px}
+.banner.b{background:#fff1e6;border:2px solid #f96706}.banner.b .banner-for{color:#c4500a}
+.banner.j{background:#e8f0fc;border:2px solid #1e4fa3}.banner.j .banner-for{color:#1e4fa3}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-block;padding:3px 11px;border-radius:999px;background:#fff;font-size:.82rem;font-weight:700;border:1.5px solid}
+.banner.b .chip{border-color:#f96706;color:#8a3a06}.banner.j .chip{border-color:#1e4fa3;color:#163a78}
+body.view-b .top{border-bottom:4px solid #f96706}
+body.view-j .top{border-bottom:4px solid #1e4fa3}
+body.view-j .badge{background:#1e4fa3}
+body.view-j .card.done .badge{background:#1d6b3d}
+body.view-j .card[open]{border-color:#1e4fa3}
+body.view-j .card[open] > summary,body.view-j .card > summary:hover{background:#eaf1fb}
+body.view-j .rule{background:#1e4fa3}
+body.view-j .note{border-left-color:#1e4fa3}
+body.view-j .grid thead th,body.view-j .grid tbody th{background:#1e4fa3;border-color:#1e4fa3}
+body.view-j .seat-no,body.view-j .price tr.total td{color:#1e4fa3}
+.start{background:#fff;border:2px solid #161b26;border-radius:14px;padding:14px 18px;margin:12px 0}
+.start h2{margin:0 0 6px;font-size:1.15rem}
+.start ul.have{margin:4px 0 8px;padding-left:1.2em}.start ul.have li{margin:3px 0}
+.start .buy{margin:8px 0}
+.stop{background:#fff;border:3px solid #c0262d;border-radius:10px;padding:10px 14px;margin:10px 0}
+.stop-title{font-weight:900;color:#c0262d;margin-bottom:2px}
+.stop ul{margin:4px 0 0;padding-left:1.2em}.stop li{margin:3px 0}
+p.stop{margin:10px 0}
+.optchips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.optchip{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #1e4fa3;border-radius:999px;padding:8px 14px;min-height:44px;font:inherit;font-weight:700;color:#163a78;cursor:pointer}
+.optchip .oc-n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#1e4fa3;color:#fff;align-items:center;justify-content:center;font-size:.85rem}
+.optchip.on{background:#1e4fa3;color:#fff}.optchip.on .oc-n{background:#fff;color:#1e4fa3}
+.opt-head{background:#eaf1fb;border-radius:10px;padding:10px 14px;margin:10px 0}
+#opt-box:empty{display:none}
+@media (max-width:899px){
+  .who{grid-template-columns:1fr}
+  .shots{flex-direction:column;gap:12px}
+  .shots figure{width:100%}
+  .banner-who{font-size:1.45rem}
+  .panel-head{padding:12px 14px;flex-wrap:wrap}
+  .optpick{grid-template-columns:1fr}
+  .panel-letter{order:1}
+  .panel-close{order:2}
+  .panel-headtext{order:3;flex:1 1 100%}
+  .panel-body .grid th,.panel-body .grid td{padding:6px 7px;font-size:.88rem}
+  .panel-letter{width:40px;height:40px;font-size:1.3rem}
+  .panel-body{padding:10px 8px 4px}
+  .panel-foot{margin:6px 8px 10px}
+  .top{position:static}
+}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <img class="logo" src="data:image/png;base64,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" alt="Tempello">
+    <div class="app-title" id="app-title">ClioCon · Flight booking guides</div>
+    <div class="top-btns">
+      <button type="button" id="expand-all" class="link">Open all</button>
+      <button type="button" id="collapse-all" class="link">Close all</button>
+    </div>
+  </div>
+</header>
+<section class="intro" id="intro"></section>
+<div id="who-anchor"></div>
+<main id="cards"><div id="sec-b" hidden></div><div id="sec-j" hidden></div></main>
+<dialog id="lightbox" aria-label="Enlarged image">
+  <button type="button" id="lightbox-close" class="btn btn-secondary">Close</button>
+  <img id="lightbox-img" alt=""><p id="lightbox-cap"></p>
+</dialog>
+<script>window.DATA = {"owner":"Luis","boss":"Jeff","brittany":{"name":"Brittany Dracup","summary":"Los Angeles (LAX) to Boston (BOS), Delta nonstop, round trip","flights":[{"label":"Going","date":"Sat, Oct 24, 2026","route":"LAX → BOS","flight":"Delta DL 437","leaves":"12:00 PM","arrives":"8:30 PM"},{"label":"Coming back","date":"Wed, Oct 28, 2026","route":"BOS → LAX","flight":"Delta DL 479","leaves":"6:45 AM","arrives":"10:10 AM"}]},"jeffAlex":{"summary":"San Diego (SAN) to Boston (BOS) and back, nonstop, 2 adults","rules":["Nonstop","No red-eyes","Land in Boston by 6:00 PM on Oct 24","Leave Boston after 1:00 PM on Oct 28","No First Class","Aisle seats across the aisle from each other, as far forward as possible (Jeff needs to walk the aisle)"],"out":{"img":"assets/alaska-outbound-rows26-34.jpg","cap":"Alaska AS 389 seat map, rows 26 to 34. Rows 29 to 31 (outlined) are fully open: blue seats are open.","priceTotal":"$562 for 2 ($281 each, Alaska's site Oct 9)"},"back":[{"name":"Alaska AS 389, Main","leaves":"6:14 PM","arrives":"9:35 PM","dur":"6 h 21 min","price":"$528 for 2","total":"$1,090 for 2","how":["Go to alaskaair.com. Choose One way, BOS to SAN, Oct 28, 2026, 2 adults.","Find AS 389, 6:14 pm to 9:35 pm, nonstop. Click the Main price ($264 per person).","On the refundable box click Continue with flights (no +$95). Then Add to cart.","Choose the seats below, then traveler details and payment (step 4)."],"seat":"Row 23 (blue seats are open)","note":"Alaska's own prices, re-read Oct 9. Seat choice is included in Main.","img":"assets/alaska-main-rows18-26.png","cap":"Alaska Main, rows 18 to 26. Row 23 (outlined) is fully open.","hl":[[3,56.5,94,11]],"short":"Alaska 6:14 pm Main","flight":"Alaska AS 389","fare":"Main","refMax":"$568 ($528 + $40)"},{"name":"Delta DL 571, Main","leaves":"5:10 PM","arrives":"8:28 PM","dur":"6 h 18 min","price":"$412 for 2","total":"$974 for 2","how":["Go to delta.com. Choose One Way, BOS to SAN, Oct 28, 2026, 2 passengers.","Find DL571, 5:10 pm to 8:28 pm, nonstop. Click the Delta Main price, then Select under Main Classic (never Main Basic).","On the trip summary ignore the upgrade boxes and the credit-card offer. Click Select Seats.","Choose the seats below. Then Save & Continue to details and payment (step 4)."],"seat":"Row 23 (blue seats are open)","note":"Watch the seat price: on Delta, front Main rows can be Preferred seats that cost extra (+$79.99 on the Delta flight we checked for Brittany). Row 23 here was not checked for a seat fee. If it shows a price, pick the nearest row with no price, or ask Luis.","img":"assets/delta-main-rows23-27.png","cap":"Delta Main, rows 23 to 27. Row 23 (outlined) is the front-most row with both aisle seats open.","hl":[[3,0,94,14]],"short":"Delta 5:10 pm Main","flight":"Delta DL 571","fare":"Main Classic","refMax":"$452 ($412 + $40)","warn":"In the picture, the aisle seats in rows 23 and 24 carry the corner mark that means Preferred, which cost extra on Delta. If the aisle seats show a price, do not buy them: stop and ask Jeff."},{"name":"Delta DL 571, Comfort","leaves":"5:10 PM","arrives":"8:28 PM","dur":"6 h 18 min","price":"$522 for 2","total":"$1,084 for 2","how":["Go to delta.com. Choose One Way, BOS to SAN, Oct 28, 2026, 2 passengers.","Find DL571, 5:10 pm to 8:28 pm, nonstop. Click the Delta Comfort price, then Select Comfort Classic.","On the trip summary ignore the upgrade boxes and the credit-card offer. Click Select Seats.","Choose the seats below. Then Save & Continue to details and payment (step 4)."],"seat":"Row 16 (blue seats are open)","note":"Comfort has extra legroom and includes seat choice. Check that the seats show no extra price.","img":"assets/delta-comfort-rows15-20.png","cap":"Delta Comfort, rows 15 to 20. Row 16 (outlined) is fully open.","hl":[[3,12,94,12]],"short":"Delta 5:10 pm Comfort","flight":"Delta DL 571","fare":"Comfort Classic","refMax":"$562 ($522 + $40)"},{"name":"Alaska AS 389, Premium Class","leaves":"6:14 PM","arrives":"9:35 PM","dur":"6 h 21 min","price":"$678 for 2","total":"$1,240 for 2","how":["Go to alaskaair.com. Choose One way, BOS to SAN, Oct 28, 2026, 2 adults.","Find AS 389, 6:14 pm to 9:35 pm, nonstop. Click the Premium price ($339 per person).","On the refundable box click Continue with flights (no +$95). Then Add to cart.","Choose the seats below, then traveler details and payment (step 4)."],"seat":"Row 6, the front row of Premium Class","note":"Alaska's own prices, re-read Oct 9. Seat choice is included in Premium.","img":"assets/alaska-premium-rows6-8.png","cap":"Alaska Premium, rows 6 to 8. Row 6 (outlined) is the front row, aisle seats open.","hl":[[3,30,94,17]],"short":"Alaska 6:14 pm Premium","flight":"Alaska AS 389","fare":"Premium","refMax":"$718 ($678 + $40)"},{"name":"JetBlue B6 319, Even More","leaves":"3:50 PM","arrives":"7:14 PM","dur":"6 h 24 min","price":"$926 for 2","total":"$1,488 for 2","how":["Go to jetblue.com. Choose One way, BOS to SAN, Oct 28, 2026, 2 travelers.","Find B6 319, 3:50 pm to 7:14 pm, nonstop. Choose the Even More fare ($463 per person).","Decline bags, travel insurance and other extras.","Choose the seats below, then traveler details and payment (step 4)."],"seat":"The two aisle seats (C and D) of the front exit row: the orange pair outlined in the picture","note":"JetBlue price read earlier on Oct 9. Even More includes seat choice. If you are unsure which seats are the outlined pair, ask Luis.","img":"assets/jetblue-b6319-front-exit.png","cap":"JetBlue seat map, front of the plane (nose on the left). The outlined orange pair, under the EXIT marks, are the two aisle seats of the front exit row.","hl":[[66.5,37.5,11.5,29]],"short":"JetBlue 3:50 pm Even More","flight":"JetBlue B6 319","fare":"Even More","refMax":"$966 ($926 + $40)","warn":"These are exit-row seats. Airlines only seat travelers there who can open the exit and help in an emergency. Jeff is recovering from surgery, so he should confirm he can sit in an exit row before this option is chosen."}]}};</script>
+<script>
+/* ClioCon flight guide: client script. Reads window.DATA (set by build-guide.mjs). No personal data in here. */
+(function () {
+  "use strict";
+  var D = window.DATA, owner = D.owner, boss = D.boss, EMAIL = "luis@tempello.ai";
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined) el.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  function $(id) { return document.getElementById(id); }
+  function b(t) { return h("b", { text: t }); }
+  function p(cls, kids) { return h("p", { class: cls }, kids); }
+  function check(t) { return p("check", [b("Check: "), t]); }
+  var dlg, dlgImg, dlgCap, stepNo = 0, cardsOfSection = [], curGroup = [];
+
+  // ---------- pictures: whole, orange outline = where to look, tap to enlarge ----------
+  function figure(src, cap, hl) {
+    var inner = h("span", { class: "fr" }, [h("img", { src: src, alt: cap })]);
+    (hl || []).forEach(function (r) { inner.appendChild(h("span", { class: "hl", style: "left:" + r[0] + "%;top:" + r[1] + "%;width:" + r[2] + "%;height:" + r[3] + "%" })); });
+    var btn = h("button", { type: "button", class: "shot", "aria-label": "Enlarge: " + cap, onclick: function () {
+      dlgImg.src = src; dlgImg.alt = cap; dlgCap.textContent = cap;
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+    } }, [inner]);
+    return h("figure", {}, [btn, h("figcaption", { text: cap })]);
+  }
+  // one numbered step = a card; ticking the circle opens the next card
+  function card(o) {
+    var d = h("details", { class: "card", id: o.id || "" }), head = h("summary", {});
+    var n = ++stepNo, badge = h("span", { class: "badge", role: "button", tabindex: "0", "aria-label": "Mark step " + n + " done", text: String(n) });
+    var tg = function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var done = d.classList.toggle("done"); badge.setAttribute("aria-pressed", String(done));
+      if (done) { d.open = false; var g = d._grp || cardsOfSection, i = g.indexOf(d), nx = g[i + 1]; if (nx) { nx.open = true; nx.scrollIntoView({ behavior: "smooth", block: "start" }); } }
+    };
+    badge.addEventListener("click", tg);
+    badge.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") tg(e); });
+    head.appendChild(badge);
+    head.appendChild(h("span", { class: "title", text: o.title }));
+    if (o.time) head.appendChild(h("span", { class: "time", text: o.time }));
+    head.appendChild(h("span", { class: "chev", "aria-hidden": "true" }));
+    d.appendChild(head);
+    var body = h("div", { class: "body" });
+    (o.parts || []).forEach(function (x) { if (x) body.appendChild(x); });
+    body.appendChild(eyeBtn("closebtn", "Hide this step", function () { d.open = false; d.scrollIntoView({ behavior: "smooth", block: "nearest" }); }));
+    d.appendChild(body);
+    cardsOfSection.push(d); d._grp = curGroup; curGroup.push(d);
+    return d;
+  }
+  // text on the left, pictures on the right (desktop); text then pictures stacked (phone)
+  function part(title, text, shots, cls) {
+    return h("div", { class: "part" + (cls ? " " + cls : "") }, [
+      h("div", { class: "part-text" }, [title ? h("h3", { text: title }) : null].concat(text)),
+      shots && shots.length ? h("div", { class: "shotcol" }, [h("div", { class: "shots" }, shots)]) : null
+    ]);
+  }
+  function table(headers, rows) {
+    return h("div", { class: "tablewrap" }, [h("table", { class: "grid" }, [
+      h("thead", {}, [h("tr", {}, headers.map(function (x) { return h("th", { text: x }); }))]),
+      h("tbody", {}, rows.map(function (r) { return h("tr", {}, r.map(function (x, i) { return h(i === 0 ? "th" : "td", { text: x, scope: i === 0 ? "row" : null }); })); }))
+    ])]);
+  }
+  function banner(cls, who, line, chips) {
+    return h("div", { class: "banner " + cls }, [
+      h("div", { class: "banner-main" }, [h("span", { class: "banner-for", text: "THIS GUIDE IS FOR" }), h("span", { class: "banner-who", text: who }), h("span", { class: "banner-line", text: line })]),
+      h("div", { class: "chips" }, chips.map(function (c) { return h("span", { class: "chip", text: c }); }))
+    ]);
+  }
+  // start / end bars: they tell the reader where a flight (or option) begins and ends
+  function band(kind, who, label, title, sub) {
+    return h("div", { class: "band " + kind + " w-" + who }, [
+      h("span", { class: "band-label", text: label }),
+      h("span", { class: "band-title", text: title }),
+      sub ? h("span", { class: "band-sub", text: sub }) : null
+    ]);
+  }
+  // a panel groups one flight or one option: dark/blue head (starts here), white step cards inside, green foot (ends here)
+  function panel(o) {
+    var head = h("div", { class: "panel-head" }, [
+      o.letter ? h("span", { class: "panel-letter", text: o.letter, "aria-hidden": "true" }) : null,
+      h("div", { class: "panel-headtext" }, [h("span", { class: "panel-label", text: o.label }), h("span", { class: "panel-title", text: o.title }), o.sub ? h("span", { class: "panel-sub", text: o.sub }) : null]),
+      o.onclose ? eyeBtn("panel-close", "Hide this option", o.onclose) : null
+    ]);
+    var body = h("div", { class: "panel-body" });
+    var foot = o.foot ? h("div", { class: "panel-foot" }, [h("span", { class: "panel-label", text: o.foot.label }), h("span", { class: "panel-title", text: o.foot.title }), o.foot.sub ? h("span", { class: "panel-sub", text: o.foot.sub }) : null]) : null;
+    var el = h("section", { class: "panel " + o.cls }, [head, body, foot]);
+    return { el: el, body: body, add: function (n) { body.appendChild(n); return n; } };
+  }
+  // the one box at the top of each booking: what to have, what to buy, when to stop
+  function startBox(items, buy, stops) {
+    return h("div", { class: "start" }, [
+      h("h2", { text: "Before you start" }),
+      h("ul", { class: "have" }, items.map(function (x) { return h("li", { text: x }); })),
+      p("buy", [b("Buy: "), buy]),
+      h("div", { class: "stop" }, [h("div", { class: "stop-title", text: "STOP and ask " + boss + " if:" }), h("ul", {}, stops.map(function (x) { return h("li", {}, x); })), p("small", [boss + " makes the calls on cost and on anything that blocks you. Message or call " + boss + " before you pay."])])
+    ]);
+  }
+  // answers to the questions the helper is most likely to have (shown at the end of each guide)
+  var FAQ_COMMON = [
+    ["The site asks me to log in or create an account?", "Continue as a guest. Never create an account or log in. If the site will not let you continue as a guest, stop and ask " + boss + "."],
+    ["A popup or box offers something (an upgrade, a refundable ticket, a credit card, miles)?", "Click No thanks or Continue. Never click Add, Upgrade, Apply or Make it refundable."],
+    ["The price is a little different from the guide?", "Small changes are normal. If the total is within the limit in the red box, go on. If it is over, stop and ask " + boss + "."],
+    ["The flight or fare is sold out, or I cannot find it?", "Stop and ask " + boss + ". Never pick a different flight or fare yourself."],
+    ["The card is declined, or the page freezes?", "Try once. If it fails, stop and ask " + boss + ". If the page froze, check your email and your card app first: the purchase may have gone through. Never buy twice."],
+    ["I think I bought the wrong thing?", "Do not buy again and do not cancel. Message " + boss + " and " + owner + " right away with a screenshot."],
+    ["Can I change or cancel it?", "No, not yourself. These fares can be changed but not refunded, so tell " + owner + " and wait."],
+    ["Is it safe to type the traveler details?", "Yes, but only on the airline's own website named in the steps (delta.com, alaskaair.com, jetblue.com). Do not type them anywhere else and do not forward " + owner + "'s private message."],
+    ["A name is rejected, or a detail is missing from " + owner + "'s private message?", "Stop and message " + owner + ". Do not guess."],
+    ["Whom do I ask?", "Cost, a different price, or anything stopping you: " + boss + " (he makes the calls). Traveler details and confirmations: " + owner + ". If neither answers within 10 minutes, stop; do not pay."],
+    ["What do I send back, and where?", "Forward each e-ticket email to " + EMAIL + " and message " + owner + " the confirmation number and the amount charged."]
+  ];
+  var FAQ_JA = [
+    ["Jeff has not picked the flight home yet?", "Book Flight 1 now. Wait for " + boss + "'s letter (A to E) before starting Flight 2."],
+    ["Only one of the two aisle seats is free?", "Stop and ask " + boss + ". Jeff and Alex need the two aisle seats across from each other."],
+    ["Why two purchases?", "Flight 1 and Flight 2 are two separate one-way tickets: two charges and two confirmation emails."]
+  ];
+  function faq(items) {
+    var d = h("details", { class: "card faq", id: "faq" }), head = h("summary", {});
+    head.appendChild(h("span", { class: "title", text: "Questions you may have" }));
+    head.appendChild(h("span", { class: "chev", "aria-hidden": "true" }));
+    d.appendChild(head);
+    var body = h("div", { class: "body" }, items.map(function (q) { return h("div", { class: "qa" }, [h("p", { class: "q" }, [b(q[0])]), h("p", { class: "a", text: q[1] })]); }));
+    body.appendChild(eyeBtn("closebtn", "Hide these questions", function () { d.open = false; d.scrollIntoView({ behavior: "smooth", block: "nearest" }); }));
+    d.appendChild(body);
+    return d;
+  }
+  // icon-only hide button (eye with a slash); the label is for screen readers and the hover tip
+  function eyeBtn(cls, label, onclick) {
+    var btn = h("button", { type: "button", class: cls, "aria-label": label, title: label, onclick: onclick });
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
+    return btn;
+  }
+  function stopLine(parts) { return h("div", { class: "stop" }, parts); }
+
+  // =========================== BRITTANY ===========================
+  function brittany() {
+    stepNo = 0; cardsOfSection = []; curGroup = [];
+    var B = D.brittany, out = [];
+    out.push(banner("b", "Brittany Dracup", "Los Angeles → Boston · Delta nonstop · 1 traveler", ["Sat Oct 24", "Wed Oct 28", "Delta Main Classic", "Aisle seats"]));
+    out.push(startBox(
+      ["The company card Jeff approved.", "Brittany's private details (name as on her ID, date of birth, SkyMiles number, phone, email) from " + owner + "'s separate email.", "About 15 minutes."],
+      "Delta, 1 adult, round trip. Out Sat Oct 24 DL437, LAX 12:00 pm to BOS 8:30 pm. Back Wed Oct 28 DL479, BOS 6:45 am to LAX 10:10 am. Main Classic both ways, aisle seats, about $526.81. No bags, no upgrades, no insurance.",
+      [[b("The total is over $540.")], [b("Any seat shows a price"), " (for example +$79.99). Pick another seat with no price. If only priced aisle seats are left, stop."], [b("A flight or fare does not match"), " the Buy line above."], [b("The site makes you log in or create an account"), " and will not let you continue as a guest."]]
+    ));
+
+    var P = panel({ cls: "p-b", label: "BOOKING STARTS HERE", title: "Brittany \u00b7 round trip LAX \u21c4 BOS \u00b7 both flights in one purchase", sub: "5 steps \u00b7 about 15 minutes", foot: { label: "BOOKING ENDS HERE", title: "You now have 1 confirmation (Delta, both flights). Forward the e-ticket to " + EMAIL + ".", sub: "If you are not sure the payment went through, do not buy again: ask " + boss + "." } });
+    out.push(P.el);
+    P.add(card({ id: "b-flights", title: "Find the two flights and choose Main Classic", time: "about 5 min", parts: [
+      part("Search", [
+        p("do", [b("Go to delta.com. "), "Round Trip, ", b("LAX"), " to ", b("BOS"), ", ", b("Oct 24"), " to ", b("Oct 28, 2026"), ", 1 passenger. Click ", b("Find Flights"), "."]),
+        p("do", [b("Click the Delta Main price "), "on the DL437 row (outlined)."])
+      ], [figure("shots/b01-results-out.jpg", "Outbound results: DL437, 12:00 pm to 8:30 pm.", [[6.1, 65.5, 86.7, 27]])]),
+      part("Choose the middle box", [
+        p("stop", [b("Select the middle box, Main Classic ($527). "), "Never Main Basic ($417): Basic cannot choose a seat."])
+      ], [figure("shots/b02-out-fares.jpg", "Main Classic (middle, outlined). Not Main Basic.", [[35.9, 44.5, 27.2, 41]])]),
+      part("Pick the return", [
+        p("do", [b("On the return list, click the price for DL479, "), "6:45 am to 10:10 am (first row, outlined)."]),
+        check("both flights say Main Classic. Not DL2004 or DL508.")
+      ], [figure("shots/b03-results-return.jpg", "Return: DL479 at 6:45 am, Main Classic.", [[6.1, 51, 86.7, 25]])]),
+      part("Trip summary", [
+        p("do", [b("Amount due should be about $526.81. "), "Ignore the Upgrade boxes and the credit-card offer. Click ", b("Select Seats"), " (next step). After the seats, click ", b("Save & Exit"), " and then ", b("Save & Continue"), "."])
+      ], [figure("shots/b06-trip-summary.jpg", "Trip summary: both flights Main Classic, $526.81.", [[11.4, 10.4, 47.8, 14.8], [62.5, 21, 27.5, 5.5]])])
+    ] }));
+
+    P.add(card({ id: "b-seats", title: "Pick the aisle seats", time: "about 4 min", parts: [
+      part(null, [
+        stopLine([b("Pick a seat with no price. "), "Aisle seats are the letters C and D. Seats near the front with a corner mark are \"Preferred\" and cost +$79.99: do not buy them. A free seat shows no price. If only priced aisle seats are left, stop and ask " + boss + "."]),
+        p("do", [b("Do DL437 first (1 of 2), click Next Flight, then DL479 (2 of 2). "), "Then click Save & Exit."]),
+        p("small", ["Free aisle seats open on Oct 9: DL437 rows 40 to 42 (C, D); DL479 34C, 38C, 38D, 39C, 39D, 40D. They can change; the rule above is what counts."])
+      ], [
+        figure("shots/b11-dl437-40d-free.jpg", "A free aisle seat (40D): P1 appears on it and no price is added.", [[28.5, 52.5, 3.6, 5.5], [9.4, 91.5, 4.5, 6.5]]),
+        figure("shots/b10-dl479-28c-selected.jpg", "A Preferred seat: 28C shows +$79.99. Do not choose.", [[21.7, 46.5, 29.5, 8.6]])
+      ])
+    ] }));
+
+    P.add(card({ id: "b-passenger", title: "Passenger details", time: "about 3 min", parts: [
+      part(null, [
+        p("do", [b("Enter Brittany's details "), "from " + owner + "'s private email. Name exactly as on her ID. Choose Delta Air Lines/SkyMiles and type her number in the Frequent Flyer box. Add Known Traveler number if " + owner + " sent one."]),
+        p("do", [b("Leave both boxes unticked: "), "'Use my Passenger Info above to sign up for SkyMiles' and 'My company is a corporate rewards program member'."]),
+        p("do", [b("Click Save & Continue.")])
+      ], [figure("shots/b13-passenger-page.jpg", "Passenger Details page (empty). Her details go in the outlined area.", [[5, 33.5, 60.5, 43.5]])])
+    ] }));
+
+    P.add(card({ id: "b-pay", title: "Pay", time: "about 3 min", parts: [
+      part(null, [
+        p("do", [b("Decline "), "trip protection and any upgrade. No bags: Brittany flies with a carry-on only."]),
+        p("do", [b("Pay with the company card. "), "Untick any box that saves the card or signs up for email."]),
+        p("do", [b("Look it over: "), "LAX to BOS Sat Oct 24 DL437, BOS to LAX Wed Oct 28 DL479, Main Classic, total about $526.81. Then ", b("you"), " click the final purchase button."]),
+        stopLine([b("Total over $540? "), "Stop and ask " + boss + " before you click the final purchase button."])
+      ])
+    ] }));
+
+    P.add(card({ id: "b-save", title: "Done: send the confirmation", time: "1 min", parts: [
+      part(null, [
+        p("do", [b("It is booked only when "), "Delta shows the confirmation page and the e-ticket email arrives. If unsure the payment went through, do not buy again: check the email and ask " + boss + "."]),
+        h("ul", { class: "save" }, ["Forward the Delta e-ticket email to " + EMAIL, "Message " + owner + " the confirmation number and the amount charged"].map(function (x) { return h("li", { text: x }); }))
+      ])
+    ] }));
+    out.push(faq(FAQ_COMMON));
+    return out;
+  }
+
+  // =========================== JEFF AND ALEX ===========================
+  // Three levels: FLIGHT panel (dark) > OPTION panel (blue, letters A to E) > STEP cards (white, numbers 1 to 3).
+  function jeffAlex() {
+    stepNo = 0; cardsOfSection = []; curGroup = [];
+    var J = D.jeffAlex, o = J.out, out = [], L = ["A", "B", "C", "D", "E"];
+    out.push(banner("j", "Jeff and Alex Dracup", "San Diego → Boston · 2 travelers · two one-way tickets", ["Sat Oct 24", "Wed Oct 28", "Aisle seats across", "Return: Jeff picks"]));
+    out.push(startBox(
+      ["The company card Jeff approved.", "Jeff's and Alex's private details (names as on their IDs, dates of birth, phones, emails, Known Traveler numbers) from " + owner + "'s separate message.", "About 30 minutes for both flights. Book Flight 1 now. Book Flight 2 as soon as " + boss + " names its letter, ideally within the same hour."],
+      "Two separate one-way tickets for 2 adults. FLIGHT 1: Alaska AS 389 to Boston, Sat Oct 24, 8:15 am to 5:07 pm, about $562 for two. FLIGHT 2: the flight home on Wed Oct 28; " + boss + " picks ONE of five options (A to E) and you do only that one. Jeff takes one aisle seat and Alex the aisle seat across the aisle, as far forward as possible.",
+      [[b("You are about to start Flight 2"), " and " + boss + " has not told you which option letter."], [b("A total is more than $40 above its reference"), " price."], [b("Any seat shows a price."), " Pick another row with no price; if none, stop."], [b("A flight or fare does not match"), " the Buy line above."], [b("The site makes you log in or create an account"), " and will not let you continue as a guest."]]
+    ));
+
+    // ----- FLIGHT 1 panel: to Boston (Alaska AS 389) -----
+    var F1 = panel({ cls: "p-flight", label: "FLIGHT 1 OF 2 · STARTS HERE", title: "San Diego → Boston · Sat Oct 24 · Alaska AS 389", sub: "3 steps · about 15 minutes",
+      foot: { label: "FLIGHT 1 ENDS HERE", title: "You now have 1 confirmation (Alaska, to Boston).", sub: "Next: Flight 2, the flight home." } });
+    out.push(F1.el);
+    F1.add(card({ id: "j-1", title: "Search and choose Main", time: "about 6 min", parts: [
+      part("Search", [
+        p("do", [b("Go to alaskaair.com. "), "One way, ", b("SAN"), " to ", b("BOS"), ", ", b("Oct 24, 2026"), ", ", b("2 adults"), ". Find ", b("AS 389"), ", 8:15 am to 5:07 pm, nonstop (outlined)."])
+      ], [figure("shots/a01-results.jpg", "AS 389, SAN to BOS, 8:15 am to 5:07 pm. Main is $281 per person.", [[2.4, 47.7, 94.2, 19.4]])]),
+      part("Choose Main, not refundable", [
+        p("do", [b("Click the Main price "), "($281 per person). Not Saver: Saver cannot choose a seat."]),
+        p("stop", [b("A box offers a refundable ticket for +$95. "), "Click ", b("Continue with flights"), ". Never Make it refundable."]),
+        p("do", [b("Trip summary: "), "AS 389, $281 per person. Click ", b("Add to cart"), ", then enter the two travelers (as in step 3)."])
+      ], [
+        figure("shots/a02-fare.jpg", "Click Continue with flights (outlined), not Make it refundable.", [[52.5, 59.8, 15.8, 5.5]]),
+        figure("shots/a03-after-continue.jpg", "Trip summary. Click Add to cart (outlined).", [[2.4, 33.5, 94, 18.5], [86, 62, 10.5, 6]])
+      ])
+    ] }));
+    F1.add(card({ id: "j-2", title: "Seats on AS 389", time: "about 3 min", parts: [
+      part(null, [
+        p("do", [b("Row 29: Jeff takes 29C, Alex takes 29D "), "(the two aisle seats, across the aisle from each other, near the front)."]),
+        p("do", [b("If row 29 is taken, "), "use row 30 or 31 the same way (C and D). If none of those are free, or only one of the two aisle seats is free, stop and ask " + boss + "."]),
+        p("small", ["Jeff must be able to walk the aisle often, and Alex sits across from him. A seat on a Main fare shows no price."])
+      ], [figure(o.img, o.cap, [[3, 33, 94, 31]])])
+    ] }));
+    F1.add(card({ id: "j-3", title: "Traveler details, pay, confirmation", time: "about 5 min", parts: [part(null, payBlock("$602"))] }));
+
+    // ----- FLIGHT 2 panel: the flight home, with five OPTION panels inside -----
+    var F2 = panel({ cls: "p-flight", label: "FLIGHT 2 OF 2 · STARTS HERE", title: "Boston → San Diego · Wed Oct 28 · five options, " + boss + " picks ONE", sub: "Do only the option letter " + boss + " names (3 steps). Skip the other four.",
+      foot: { label: "FLIGHT 2 ENDS HERE · ALL DONE", title: "You should now have 2 confirmations: one to Boston and one home. Forward both e-tickets to " + EMAIL + ".", sub: "If you are not sure a payment went through, do not buy again: check the email and ask " + boss + "." } });
+    out.push(F2.el);
+    F2.body.appendChild(stopLine([b("Do not start an option until " + boss + " tells you its letter."), " Tap the option below, one at a time."]));
+    var panels = [], btns = [];
+    var pickNote = p("small", ["Tap an option to see its three steps. You see one at a time."]);
+    function hideAll() { panels.forEach(function (x) { x.hidden = true; }); btns.forEach(function (x) { x.classList.remove("on"); x.setAttribute("aria-pressed", "false"); }); pickNote.hidden = false; }
+    function showOpt(i) { hideAll(); panels[i].hidden = false; btns[i].classList.add("on"); btns[i].setAttribute("aria-pressed", "true"); pickNote.hidden = true; var first = panels[i].querySelector("details"); if (first) first.open = true; panels[i].scrollIntoView({ behavior: "smooth", block: "start" }); }
+    F2.body.appendChild(h("div", { class: "optpick", role: "group", "aria-label": "Flight home options" }, J.back.map(function (r, i) {
+      var bt = h("button", { type: "button", class: "optbtn", "aria-pressed": "false", onclick: function () { if (btns[i].classList.contains("on")) hideAll(); else showOpt(i); } }, [h("span", { class: "ol", text: L[i] }), h("span", { class: "ot" }, [h("b", { text: r.flight + " \u00b7 " + r.fare }), h("small", { text: r.leaves + " \u2192 " + r.arrives + " \u00b7 " + r.price })])]);
+      btns.push(bt); return bt;
+    })));
+    F2.body.appendChild(pickNote);
+    J.back.forEach(function (r, i) {
+      stepNo = 0; curGroup = [];
+      var P = panel({ cls: "p-opt", letter: L[i], onclose: hideAll, label: "OPTION " + L[i] + " · STARTS HERE", title: r.name + " · " + r.leaves + " → " + r.arrives, sub: "About " + r.price + " · only if " + boss + " picked option " + L[i],
+        foot: { label: "OPTION " + L[i] + " ENDS HERE", title: "You now have 1 confirmation (" + r.name + ", home to San Diego).", sub: "That finishes Flight 2. Skip the other options." } });
+      P.el.hidden = true; panels.push(P.el); F2.body.appendChild(P.el);
+      if (r.warn) P.add(stopLine([b("Check first: "), r.warn]));
+      P.add(card({ id: "o" + L[i] + "-1", title: "Search and choose the fare", time: "about 4 min", parts: [
+        part(null, [h("ol", { class: "how" }, r.how.slice(0, 3).map(function (x) { return h("li", { text: x }); }))])
+      ] }));
+      P.add(card({ id: "o" + L[i] + "-2", title: "Seats", time: "about 3 min", parts: [
+        part(null, [
+          p("do", [b(r.seat + ". "), "Jeff takes one aisle seat, Alex the aisle seat across. If a seat shows a price, or the row is gone, stop and ask " + boss + "."]),
+          null
+        ], [figure(r.img, r.cap, r.hl)])
+      ] }));
+      P.add(card({ id: "o" + L[i] + "-3", title: "Traveler details, pay, confirmation", time: "about 5 min", parts: [
+        part(null, [
+          p("do", [b("Same as Flight 1, step 3: "), "enter Jeff and Alex, decline refundable upgrades, insurance, bags and credit-card offers, and pay with the company card."]),
+          stopLine([b("Stop and ask " + boss + " if the total for 2 is over " + r.refMax + "."), " Otherwise ", b("you"), " click the final purchase button."]),
+          p("do", [b("Done: "), "forward the e-ticket email to " + EMAIL + " and message " + owner + " the confirmation number and amount."])
+        ])
+      ] }));
+    });
+    out.push(faq(FAQ_COMMON.concat(FAQ_JA)));
+    curGroup = []; stepNo = 0;
+    return out;
+  }
+  // shared by flight 1 and flight 2: the same short details / pay / save list
+  function payBlock(maxTotal) {
+    return [
+      p("do", [b("Travelers: "), "Jeff and Alex, names exactly as on their IDs, date of birth, gender, phone, email, Known Traveler and mileage numbers if " + owner + " sent them."]),
+      p("do", [b("Decline "), "refundable upgrades, insurance, bags (carry-on only), upgrades and credit-card offers."]),
+      p("do", [b("Pay "), "with the company card. Untick any box that saves the card or signs up for email."]),
+      stopLine([b("Stop and ask " + boss + " if the total for 2 is over " + maxTotal + "."), " Otherwise ", b("you"), " click the final purchase button."]),
+      p("do", [b("Done: "), "forward the e-ticket email to " + EMAIL + " and message " + owner + " the confirmation number and amount. It is booked only when the confirmation page and e-ticket email appear."])
+    ];
+  }
+
+  // =========================== PAGE ===========================
+  function intro() {
+    $("intro").appendChild(h("div", { class: "intro-in" }, [
+      h("h1", { text: "Flight booking guides" }),
+      p("big", ["Two separate bookings. ", b("Pick the one you are booking now:")]),
+      h("div", { class: "who" }, [
+        h("button", { type: "button", class: "who-btn b", id: "pick-b", onclick: function () { show("brittany", true); } }, [h("span", { class: "who-top", text: "BOOKING 1" }), h("span", { class: "who-name", text: "Brittany" }), h("span", { class: "who-sub", text: "Los Angeles → Boston · Delta · 1 traveler" })]),
+        h("button", { type: "button", class: "who-btn j", id: "pick-j", onclick: function () { show("jeff-alex", true); } }, [h("span", { class: "who-top", text: "BOOKING 2" }), h("span", { class: "who-name", text: "Jeff and Alex" }), h("span", { class: "who-sub", text: "San Diego → Boston · Alaska + return option · 2 travelers" })])
+      ]),
+      p("small", ["Prices are references from the airlines' websites on Oct 8 and 9 and can move a little. You click the final purchase button yourself; these guides never buy anything. Tap a picture to enlarge it. The orange outline shows where to look."])
+    ]));
+  }
+  var built = {};
+  function show(which, push) {
+    var secB = $("sec-b"), secJ = $("sec-j"), isB = which === "brittany", isJ = which === "jeff-alex";
+    if (isB && !built.b) { brittany().forEach(function (n) { secB.appendChild(n); }); built.b = true; var f1 = secB.querySelector("details"); if (f1) f1.open = true; }
+    if (isJ && !built.j) { jeffAlex().forEach(function (n) { secJ.appendChild(n); }); built.j = true; var f2 = secJ.querySelector("details"); if (f2) f2.open = true; }
+    secB.hidden = !isB; secJ.hidden = !isJ;
+    $("pick-b").classList.toggle("on", isB); $("pick-j").classList.toggle("on", isJ);
+    $("pick-b").setAttribute("aria-pressed", String(isB)); $("pick-j").setAttribute("aria-pressed", String(isJ));
+    var t = isB ? "Brittany" : isJ ? "Jeff and Alex" : "";
+    $("app-title").textContent = t ? "ClioCon · Booking for " + t : "ClioCon · Flight booking guides";
+    document.title = t ? "ClioCon flights: " + t : "ClioCon flight booking guides";
+    document.body.className = isB ? "view-b" : isJ ? "view-j" : "";
+    if (push) { try { history.replaceState(null, "", "#" + which); } catch (e) { location.hash = which; } window.scrollTo({ top: $("who-anchor").offsetTop - 8, behavior: "smooth" }); }
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    dlg = $("lightbox"); dlgImg = $("lightbox-img"); dlgCap = $("lightbox-cap");
+    $("lightbox-close").addEventListener("click", function () { dlg.close(); });
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+    intro();
+    var hsh = (location.hash || "").replace("#", "");
+    show(hsh === "brittany" || hsh === "jeff-alex" ? hsh : "", false);
+    function setAll(open) { document.querySelectorAll("main details").forEach(function (d) { d.open = open; }); }
+    $("expand-all").addEventListener("click", function () { setAll(true); });
+    $("collapse-all").addEventListener("click", function () { setAll(false); });
+    window.addEventListener("hashchange", function () { var x = location.hash.replace("#", ""); if (x === "brittany" || x === "jeff-alex") show(x, false); });
+  });
+})();
+
+</script>
+</body>
+</html>
