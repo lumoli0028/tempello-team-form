@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -45,6 +45,7 @@ label.opt:has(input:checked) .pick:before{background:var(--or);box-shadow:inset 
 .bar .in{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .bar b{font-size:18px}.bar small{display:block;color:var(--mut)}
 .btn{background:var(--or);color:#fff;border:0;border-radius:999px;padding:12px 22px;font-weight:700;font-size:16px}
+.opt.full{grid-template-columns:minmax(0,1fr)}.opt.full .shot{max-width:100%}
 @media(max-width:680px){.opt{grid-template-columns:minmax(0,1fr)}.shot{max-width:320px}h1{font-size:26px}}
 </style>
 </head>
@@ -95,6 +96,25 @@ label.opt:has(input:checked) .pick:before{background:var(--or);box-shadow:inset 
   </div>
 </label>
 
+<label class="opt full">
+  <input type="radio" name="ret" value="1454" data-n="JetBlue B6 319, Even More, front exit row">
+  <div>
+    <div class="date">WED, OCT 28</div>
+    <p class="times">3:50 PM &rarr; 7:14 PM</p>
+    <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+    <p class="meta">Nonstop &middot; 6h 24m &middot; JetBlue B6 319 Even More</p>
+    <div class="seatline">Front exit row, aisle seats across from each other</div>
+    <p class="price">$926 <small>total for 2</small></p>
+    <span class="pick">Choose this flight</span>
+  </div>
+  <div class="shot">
+    <div class="fr">
+      <img src="assets/jetblue-b6319-seatmap.png" alt="JetBlue B6 319 seat map with legend. The first Even More column at the front exit row has both aisle seats open.">
+      <div class="hl" style="left:24.5%;width:4.8%;top:65.5%;height:16%"></div>
+    </div>
+    <p class="cap">Plane seen from above, nose on the left. Orange seats are Even More and the outlined pair are the two aisle seats in the front exit row, both open. Seat choice is included in the Even More fare. JetBlue does not print row numbers.</p>
+  </div>
+</label>
 <label class="opt">
   <input type="radio" name="ret" value="1050" data-n="Delta DL 571, Comfort, row 16">
   <div>
