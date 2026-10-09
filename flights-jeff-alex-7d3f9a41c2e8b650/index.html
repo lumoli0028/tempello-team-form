@@ -44,6 +44,7 @@ label.opt:has(input:checked) .pick:before{background:var(--or);box-shadow:inset 
 .bar.on{display:block}
 .bar .in{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .bar b{font-size:18px}.bar small{display:block;color:var(--mut)}
+.btn[disabled]{opacity:.65}.btn.alt{background:#fff;color:var(--or);border:2px solid var(--or)}.bar small{display:block;color:var(--mut)}
 .btn{background:var(--or);color:#fff;border:0;border-radius:999px;padding:12px 22px;font-weight:700;font-size:16px}
 .opt.full{grid-template-columns:minmax(0,1fr)}.opt.full .shot{max-width:100%}
 @media(max-width:680px){.opt{grid-template-columns:minmax(0,1fr)}.shot{max-width:320px}h1{font-size:26px}}
@@ -166,27 +167,55 @@ label.opt:has(input:checked) .pick:before{background:var(--or);box-shadow:inset 
   </div>
 </label>
 
+<h2>3 &middot; Note for Luis <span>optional</span></h2>
+<textarea id="note" rows="3" placeholder="Anything Luis should know" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;color:inherit"></textarea>
 <p class="foot">Seats shown were open on the airlines' own seat maps on Oct 8 and are not held until booked. Prices are the airlines' own and can change. Luis confirms before booking.</p>
 </div>
 
-<div class="bar" id="bar"><div class="in"><div><b id="tot"></b><small id="nm"></small></div><button class="btn" type="button" id="copy">Copy my choice</button></div></div>
+<div class="bar" id="bar"><div class="in"><div><b id="tot"></b><small id="nm"></small><small id="st" role="status"></small></div><div><button class="btn" type="button" id="send">Send my choice</button> <button class="btn alt" type="button" id="copy" hidden>Copy instead</button></div></div></div>
 <script>
-document.querySelectorAll('input[name=ret]').forEach(function(r){
-  r.addEventListener('change',function(){
-    document.getElementById('tot').textContent='Round trip: $'+Number(r.value).toLocaleString()+' for 2';
-    document.getElementById('nm').textContent='Return: '+r.dataset.n;
-    document.getElementById('bar').classList.add('on');
+/* Sends one row to the team Google Form (answers land in Luis's Google Sheet). no-cors: Google gives no readable
+   reply, so only a network failure can be detected. */
+var FORM={ID:'1FAIpQLSeo6nSr8nPlMkopNZqlasByuAYXqj-uWh-RmWGdRO4uZIsVEA',
+  ENTRY:{out:758327712,home:995125082,total:1806010470,bags:1227054406,seats:876429359,note:811722676,full:402968477}};
+var OUT='Sat Oct 24, SAN 8:15 AM to BOS 5:07 PM, Alaska AS 389 Main, row 29 (aisle seats across from each other), $528 for 2';
+var HOME={
+ '1206':'Wed Oct 28, BOS 6:14 PM to SAN 9:35 PM, Alaska AS 389 Premium Class, row 6 (aisle seats across from each other), $678 for 2',
+ '1454':'Wed Oct 28, BOS 3:50 PM to SAN 7:14 PM, JetBlue B6 319 Even More, front exit row (aisle seats across from each other), $926 for 2',
+ '1050':'Wed Oct 28, BOS 5:10 PM to SAN 8:28 PM, Delta DL 571 Comfort, row 16 (aisle seats across from each other), $522 for 2',
+ '940':'Wed Oct 28, BOS 5:10 PM to SAN 8:28 PM, Delta DL 571 Main, row 23 (aisle seats across from each other), $412 for 2',
+ '1056':'Wed Oct 28, BOS 6:14 PM to SAN 9:35 PM, Alaska AS 389 Main, row 23 (aisle seats across from each other), $528 for 2'};
+var sending=false, sentVal=null, sentNote=null;
+function sel(){return document.querySelector('input[name=ret]:checked');}
+function summary(){var r=sel(); if(!r)return ''; var note=document.getElementById('note').value.trim();
+  return 'ClioCon flights for Jeff and Alex. TO BOSTON: '+OUT+'. HOME: '+HOME[r.value]+'. ROUND TRIP: $'+Number(r.value).toLocaleString()+' for 2.'+(note?' NOTE: '+note:'');}
+function render(){
+  var r=sel(), bar=document.getElementById('bar'), send=document.getElementById('send'), st=document.getElementById('st'), cp=document.getElementById('copy');
+  if(!r){bar.classList.remove('on');return;}
+  bar.classList.add('on');
+  document.getElementById('tot').textContent='Round trip: $'+Number(r.value).toLocaleString()+' for 2';
+  document.getElementById('nm').textContent='Return: '+r.dataset.n;
+  var same=(sentVal===r.value && sentNote===document.getElementById('note').value.trim());
+  send.disabled=sending||same;
+  send.textContent= sending?'Sending...' : same?'Sent to Luis \u2713' : (sentVal?'Send updated choice':'Send my choice');
+  if(same && !sending){st.textContent='Sent. Luis has your choice and will confirm before booking.';}
+  else if(!sending && !st.dataset.err){st.textContent='';}
+}
+document.querySelectorAll('input[name=ret]').forEach(function(r){r.addEventListener('change',function(){document.getElementById('st').dataset.err='';document.getElementById('copy').hidden=true;render();});});
+document.getElementById('note').addEventListener('input',render);
+document.getElementById('send').addEventListener('click',function(){
+  var r=sel(); if(!r||sending)return; var st=document.getElementById('st'); sending=true; st.dataset.err=''; render(); st.textContent='Sending...';
+  var body=new FormData(); function put(k,v){body.append('entry.'+FORM.ENTRY[k],v);}
+  put('out',OUT); put('home',HOME[r.value]); put('total','$'+Number(r.value).toLocaleString()+' for 2'); put('bags','not asked'); put('seats','Aisle seats across from each other, as far forward as possible (row shown in the choice)'); put('note',document.getElementById('note').value.trim()); put('full',summary());
+  fetch('https://docs.google.com/forms/d/e/'+FORM.ID+'/formResponse',{method:'POST',mode:'no-cors',body:body}).then(function(){
+    sending=false; sentVal=r.value; sentNote=document.getElementById('note').value.trim(); render();
+  },function(){
+    sending=false; st.dataset.err='1'; st.textContent='Could not send. Check your connection and try again, or tap Copy instead and message Luis.'; document.getElementById('copy').hidden=false; render();
   });
 });
-document.getElementById('copy').addEventListener('click',function(){
-  var r=document.querySelector('input[name=ret]:checked'); if(!r)return;
-  var txt='ClioCon flights, Jeff and Alex. Outbound: Sat Oct 24, Alaska AS 389, 8:15 AM to 5:07 PM, row 29. Return: Wed Oct 28, '+r.dataset.n+'. Round trip: $'+Number(r.value).toLocaleString()+' for 2.';
-  var b=this, done=function(){b.textContent='Copied. Paste it to Luis';};
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){window.prompt('Copy this and send it to Luis:',txt);});}
-  else{window.prompt('Copy this and send it to Luis:',txt);}
-});</script>
+document.getElementById('copy').addEventListener('click',function(){var t=summary(),b=this,st=document.getElementById('st');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){st.textContent='Copied. Paste it to Luis.';},function(){window.prompt('Copy this and send it to Luis:',t);});}
+  else{window.prompt('Copy this and send it to Luis:',t);}});
+</script>
 </body>
 </html>
-
-
-
