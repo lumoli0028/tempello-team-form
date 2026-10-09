@@ -1,0 +1,172 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Flights for Jeff and Alex - ClioCon 2026</title>
+<style>
+:root{--ink:#14213d;--mut:#5b6475;--line:#e3e6ec;--soft:#f7f8fa;--or:#F96706}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px 110px}
+header{padding:28px 0 18px;border-bottom:3px solid var(--or)}
+.brand{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--or)}
+h1{margin:6px 0 4px;font-size:30px;line-height:1.15}
+.sub{margin:0;color:var(--mut)}
+.rules{max-width:100%;display:flex;flex-wrap:wrap;gap:6px 18px;margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--mut)}
+.rules li:before{content:"\2713\00a0";color:var(--or);font-weight:700}
+h2{margin:36px 0 12px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--or)}
+h2 span{color:var(--mut);font-weight:500;letter-spacing:0;text-transform:none}
+.opt{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;border:2px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;background:#fff;cursor:pointer;position:relative}
+.opt.static{cursor:default}
+.opt:has(input:checked){border-color:var(--or);background:#fffaf6}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:focus-visible){outline:3px solid #f9670655}
+.dot{display:none}
+label.opt .pick{display:inline-block;margin-top:14px;font-size:14px;font-weight:700;color:var(--or)}
+label.opt .pick:before{content:"";display:inline-block;width:16px;height:16px;border:2px solid var(--or);border-radius:50%;margin-right:8px;vertical-align:-3px}
+label.opt:has(input:checked) .pick:before{background:var(--or);box-shadow:inset 0 0 0 3px #fff}
+.date{font-size:13px;font-weight:700;color:var(--mut);letter-spacing:.04em}
+.times{margin:2px 0 0;font-size:24px;font-weight:700;line-height:1.2}
+.route{margin:0;font-size:14px;color:var(--mut)}
+.meta{margin:8px 0 0;font-size:15px}
+.seatline{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#eef7f1;color:#14613a;font-size:15px;font-weight:600}
+.price{margin:14px 0 0;font-size:26px;font-weight:700}
+.price small{font-size:13px;font-weight:500;color:var(--mut)}
+.shot{position:relative;align-self:start}
+.fr{position:relative}
+.shot img{display:block;width:100%;border:1px solid var(--line);border-radius:10px}
+.hl{position:absolute;left:-3px;right:-3px;border:3px solid var(--or);border-radius:10px;pointer-events:none}
+.cap{margin:8px 0 0;font-size:13px;color:var(--mut)}
+.foot{margin:28px 0 0;font-size:13px;color:var(--mut)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 20px;display:none}
+.bar.on{display:block}
+.bar .in{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.bar b{font-size:18px}.bar small{display:block;color:var(--mut)}
+.btn{background:var(--or);color:#fff;border:0;border-radius:999px;padding:12px 22px;font-weight:700;font-size:16px}
+@media(max-width:680px){.opt{grid-template-columns:minmax(0,1fr)}.shot{max-width:320px}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">TEMPELLO &middot; CLIOCON 2026</div>
+  <h1>Flights for Jeff and Alex</h1>
+  <p class="sub">San Diego to Boston and back. Prices are totals for two.</p>
+  <ul class="rules">
+    <li>Nonstop</li><li>No red-eyes</li><li>Land in Boston by 6:00 PM, Oct 24</li><li>Leave Boston after 1:00 PM, Oct 28</li><li>No First Class</li><li>Aisle seats across from each other, as far forward as possible</li>
+  </ul>
+</header>
+
+<h2>1 &middot; Flight to Boston</h2>
+<div class="opt static">
+  <div>
+    <div class="date">SAT, OCT 24</div>
+    <p class="times">8:15 AM &rarr; 5:07 PM</p>
+    <p class="route">San Diego (SAN) &rarr; Boston (BOS)</p>
+    <p class="meta">Nonstop &middot; 5h 52m &middot; Alaska AS 389</p>
+    <div class="seatline">Row 29, aisle seats across from each other</div>
+    <p class="price">$528 <small>total for 2</small></p>
+  </div>
+  <div class="shot">
+    <div class="fr"><img src="assets/alaska-outbound-rows26-34.jpg" alt="Alaska AS 389 seat map, rows 26 to 34. Rows 29 to 31 are fully open."><div class="hl" style="top:34%;height:30%"></div></div>
+    <p class="cap">Blue seats are open. Rows 29 to 31 are fully open. Seat choice is included in the fare.</p>
+  </div>
+</div>
+
+<h2>2 &middot; Flight home <span>Wed, Oct 28 &mdash; choose one</span></h2>
+
+<label class="opt">
+  <input type="radio" name="ret" value="1206" data-n="Alaska AS 389, Premium, row 6">
+  <div>
+    <div class="date">WED, OCT 28</div>
+    <p class="times">6:14 PM &rarr; 9:35 PM</p>
+    <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+    <p class="meta">Nonstop &middot; 6h 21m &middot; Alaska AS 389 Premium Class</p>
+    <div class="seatline">Row 6, aisle seats across from each other</div>
+    <p class="price">$678 <small>total for 2</small></p>
+    <span class="pick">Choose this flight</span>
+  </div>
+  <div class="shot">
+    <div class="fr"><img src="assets/alaska-premium-rows6-8.png" alt="Alaska AS 389 Premium rows 6 to 8. Row 6 aisle seats are open."><div class="hl" style="top:30%;height:17%"></div></div>
+    <p class="cap">Green seats are open. Row 6 is the front row of Premium Class. Seat choice is included in the Premium fare.</p>
+  </div>
+</label>
+
+<label class="opt">
+  <input type="radio" name="ret" value="1050" data-n="Delta DL 571, Comfort, row 16">
+  <div>
+    <div class="date">WED, OCT 28</div>
+    <p class="times">5:10 PM &rarr; 8:28 PM</p>
+    <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+    <p class="meta">Nonstop &middot; 6h 18m &middot; Delta DL 571 Comfort</p>
+    <div class="seatline">Row 16, aisle seats across from each other</div>
+    <p class="price">$522 <small>total for 2</small></p>
+    <span class="pick">Choose this flight</span>
+  </div>
+  <div class="shot">
+    <div class="fr"><img src="assets/delta-comfort-rows15-20.png" alt="Delta DL 571 Comfort rows 15 to 20. Row 16 is fully open."><div class="hl" style="top:12%;height:12%"></div></div>
+    <p class="cap">Blue seats are open. Row 16 is fully open. Seat choice is included in the Comfort fare.</p>
+  </div>
+</label>
+
+<label class="opt">
+  <input type="radio" name="ret" value="940" data-n="Delta DL 571, Main, row 23">
+  <div>
+    <div class="date">WED, OCT 28</div>
+    <p class="times">5:10 PM &rarr; 8:28 PM</p>
+    <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+    <p class="meta">Nonstop &middot; 6h 18m &middot; Delta DL 571 Main</p>
+    <div class="seatline">Row 23, aisle seats across from each other</div>
+    <p class="price">$412 <small>total for 2</small></p>
+    <span class="pick">Choose this flight</span>
+  </div>
+  <div class="shot">
+    <div class="fr"><img src="assets/delta-main-rows23-27.png" alt="Delta DL 571 Main rows 23 to 27. Row 23 aisle seats are open."><div class="hl" style="top:0;height:14%"></div></div>
+    <p class="cap">Blue seats are open. Row 23 is the front-most row with both aisle seats open. Seat choice is included in the fare.</p>
+  </div>
+</label>
+
+<label class="opt">
+  <input type="radio" name="ret" value="1056" data-n="Alaska AS 389, Main, row 23">
+  <div>
+    <div class="date">WED, OCT 28</div>
+    <p class="times">6:14 PM &rarr; 9:35 PM</p>
+    <p class="route">Boston (BOS) &rarr; San Diego (SAN)</p>
+    <p class="meta">Nonstop &middot; 6h 21m &middot; Alaska AS 389 Main</p>
+    <div class="seatline">Row 23, aisle seats across from each other</div>
+    <p class="price">$528 <small>total for 2</small></p>
+    <span class="pick">Choose this flight</span>
+  </div>
+  <div class="shot">
+    <div class="fr"><img src="assets/alaska-main-rows18-26.png" alt="Alaska AS 389 Main rows 18 to 26. Row 23 is fully open."><div class="hl" style="top:57%;height:10%"></div></div>
+    <p class="cap">Blue seats are open. Row 23 is fully open. Seat choice is included in the Main fare.</p>
+  </div>
+</label>
+
+<p class="foot">Seats shown were open on the airlines' own seat maps on Oct 8 and are not held until booked. Prices are the airlines' own and can change. Luis confirms before booking.</p>
+</div>
+
+<div class="bar" id="bar"><div class="in"><div><b id="tot"></b><small id="nm"></small></div><button class="btn" type="button" id="copy">Copy my choice</button></div></div>
+<script>
+document.querySelectorAll('input[name=ret]').forEach(function(r){
+  r.addEventListener('change',function(){
+    document.getElementById('tot').textContent='Round trip: $'+Number(r.value).toLocaleString()+' for 2';
+    document.getElementById('nm').textContent='Return: '+r.dataset.n;
+    document.getElementById('bar').classList.add('on');
+  });
+});
+document.getElementById('copy').addEventListener('click',function(){
+  var r=document.querySelector('input[name=ret]:checked'); if(!r)return;
+  var txt='ClioCon flights, Jeff and Alex. Outbound: Sat Oct 24, Alaska AS 389, 8:15 AM to 5:07 PM, row 29. Return: Wed Oct 28, '+r.dataset.n+'. Round trip: $'+Number(r.value).toLocaleString()+' for 2.';
+  var b=this, done=function(){b.textContent='Copied. Paste it to Luis';};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){window.prompt('Copy this and send it to Luis:',txt);});}
+  else{window.prompt('Copy this and send it to Luis:',txt);}
+});</script>
+</body>
+</html>
+
+
+
