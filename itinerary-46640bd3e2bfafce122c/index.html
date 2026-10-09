@@ -105,6 +105,55 @@ details.cancel>summary::after{content:' +';margin-left:4px}details.cancel[open]>
 @media (prefers-reduced-motion:reduce){.chev{transition:none}}
 @media (prefers-reduced-motion:no-preference){.chk,.chk svg{transition:background .2s ease,opacity .2s ease,transform .2s ease}details.day[open]>ul.rows{animation:rowsIn .22s ease-out}@keyframes rowsIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}}
 @media print{.flowwrap{break-inside:avoid}body:has(.pane:target) .flowwrap,body:has(.pane:target) .endlinks{display:none!important}body:has(.pane:target) .printkeys{display:block!important}.chk,.flegend,.flcap,.rs{display:none!important}.ev,.hotel,.bhr{break-inside:avoid}}
+/* ---- Subtle motion (all of it off under reduced motion and in print) ---- */
+@media (prefers-reduced-motion:no-preference){
+:root{interpolate-size:allow-keywords}
+/* path: the line draws once, circles rise in a quick stagger (runs once at load, never on scroll) */
+.flow>.fl:nth-child(1){--i:0}.flow>.fl:nth-child(2){--i:1}.flow>.fl:nth-child(3){--i:2}.flow>.fl:nth-child(4){--i:3}.flow>.fl:nth-child(5){--i:4}
+.fl:not(:last-child)::before{transform-origin:top;animation:lineIn .5s cubic-bezier(.22,1,.36,1) calc(var(--i,0)*.09s + .1s) backwards}
+.fd{animation:fdIn .36s cubic-bezier(.22,1,.36,1) calc(var(--i,0)*.08s) backwards}
+@keyframes lineIn{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fdIn{from{opacity:0;transform:translateY(8px) scale(.94)}to{opacity:1;transform:none}}
+/* soft ring on today / next up: three slow rings, then still */
+.fl.today .fd::after,.fl.upnext .fd::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--must);opacity:0;pointer-events:none;animation:ring 2.6s ease-out 1s 3}
+@keyframes ring{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(1.38)}}
+/* status line */
+.fstat{animation:fadeIn .4s ease-out}.fs1{animation:upIn .45s cubic-bezier(.22,1,.36,1) .08s backwards}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes upIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* day cards and other open/close blocks: height eases where the browser supports it, otherwise a short fade */
+@supports selector(::details-content){
+details.day::details-content,details.moreinfo::details-content,details.cancel::details-content,details.evbox::details-content,details.where::details-content{block-size:0;overflow:clip;transition:block-size .3s cubic-bezier(.22,1,.36,1),content-visibility .3s allow-discrete}
+details.day[open]::details-content,details.moreinfo[open]::details-content,details.cancel[open]::details-content,details.evbox[open]::details-content,details.where[open]::details-content{block-size:auto}
+}
+details.moreinfo[open]>ul,details.cancel[open]>ul,details.evbox[open]>ol,details.where[open]>ul,details.where[open]>div{animation:rowsIn .24s ease-out}
+.chev{transition:transform .25s cubic-bezier(.22,1,.36,1),margin-top .25s ease}
+/* must-do checks: the tick draws in, the circle pops once, finished rows soften */
+.chk svg path{stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset .26s ease .04s}
+.chk[aria-pressed=true] svg path{stroke-dashoffset:0}
+.chk.pop{animation:pop .3s cubic-bezier(.22,1,.36,1)}
+@keyframes pop{0%{transform:scale(.82)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+.rb{transition:opacity .25s ease}.rw.done .rb{opacity:.62}
+.cnt.tick{display:inline-block;animation:upIn .3s ease-out}
+/* filters: chips fade colour, rows leave and enter softly, day cards dim smoothly */
+.lg{transition:background-color .2s ease,color .2s ease,border-color .2s ease,transform .12s ease}
+.fl{transition:opacity .25s ease}
+.flowwrap[data-filter] li.rw{transition:opacity .22s ease,display .22s allow-discrete}
+.flowwrap[data-filter=must] li.rw:not([data-t~=must]),.flowwrap[data-filter=prep] li.rw:not([data-t~=prep]),.flowwrap[data-filter=clicon] li.rw:not([data-t~=clicon]),.flowwrap[data-filter=social] li.rw:not([data-t~=social]){opacity:0}
+@starting-style{.flowwrap[data-filter] li.rw{opacity:0}}
+/* name list, panels and small controls */
+.names a.namerow{transition:background-color .2s ease,transform .12s ease}
+.names a.namerow .go{display:inline-block;transition:transform .2s ease}
+.names a.namerow:hover .go,.names a.namerow:active .go,.names a.namerow:focus-visible .go{transform:translateX(5px)}
+.xbtn,.lnk,.pbtn,.cp,.rs,.dl{transition:background-color .2s ease,color .2s ease,border-color .2s ease,transform .12s ease}
+/* tap feedback */
+.lg:active,.xbtn:active,.lnk:active,.pbtn:active,.cp:active,.rs:active,.names a.namerow:active,nav .navmine:active{transform:scale(.97)}
+.chk:active{transform:scale(.9)}
+.totop:active,.js .totop.show:active{transform:scale(.92)}
+}
+/* belt and braces: nothing moves for people who ask for reduced motion, and nothing is mid-animation on paper */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{*,*::before,*::after{animation:none!important;transition:none!important}.fd,.fl,.rw,.rb,.fstat,.fs1{opacity:1!important}.fd,.fl:not(:last-child)::before{transform:none!important}.fd::after{display:none!important}.chk svg path{stroke-dashoffset:0!important}}
 
 footer{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:14px}footer a,.callout a,td a,.note a,.txt a,.cal p a:not(.btn){color:var(--accent)}
 @media(max-width:600px){.card,.row{grid-template-columns:1fr}.callout dl{grid-template-columns:1fr}table{min-width:0}thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}tr,td{display:block}tr{padding:8px 0;border-top:1px solid var(--line)}tr:first-child{border-top:0}td{border:0;padding:6px 14px}td:before{content:attr(data-label);display:block;color:var(--accent);font:700 13px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}#print{display:none}}
@@ -208,19 +257,19 @@ function label(r){return r.querySelector('.rt').textContent+', '+r.querySelector
 function dayName(r){var li=r.closest('li.fl');return li?li.querySelector('.fd b').textContent+' '+li.querySelector('.fd span').textContent:''}
 function count(){var m=[].slice.call(app.querySelectorAll('li.mustrow')),n=m.filter(function(r){return r.classList.contains('done')}).length;return {n:n,total:m.length,left:m.filter(function(r){return !r.classList.contains('done')})}}
 function status(){var now=bos(),c=count(),l1,l2='';
- rows.forEach(function(r){r.classList.remove('now','next');var t=r.querySelector('.tg');if(t)t.textContent=''});days.forEach(function(d){d.classList.remove('today')});
+ rows.forEach(function(r){r.classList.remove('now','next');var t=r.querySelector('.tg');if(t)t.textContent=''});days.forEach(function(d){d.classList.remove('today','upnext')});
  if(!now){s1.textContent='ClioCon, Boston \u00b7 Oct 24 to 28';}
- else if(now<'2026-10-24T00:00'){var a=Date.UTC(+now.slice(0,4),+now.slice(5,7)-1,+now.slice(8,10)),b=Date.UTC(2026,9,24),n=Math.round((b-a)/864e5);l1=n+(n===1?' day':' days')+' to go';var nx=c.left[0];if(nx)l2='Next must-do: '+label(nx)+' ('+dayName(nx)+')';s1.textContent=l1}
+ else if(now<'2026-10-24T00:00'){var a=Date.UTC(+now.slice(0,4),+now.slice(5,7)-1,+now.slice(8,10)),b=Date.UTC(2026,9,24),n=Math.round((b-a)/864e5);l1=n+(n===1?' day':' days')+' to go';var nx=c.left[0];if(nx){l2='Next must-do: '+label(nx)+' ('+dayName(nx)+')';var nl=nx.closest('li.fl');if(nl)nl.classList.add('upnext')}s1.textContent=l1}
  else if(now>='2026-10-28T12:00'){s1.textContent='ClioCon is over. Safe travels.';if(init)days.forEach(function(d){var det=d.querySelector('details.day');if(det)det.open=false})}
  else{var cur=null,nxt=null;rows.forEach(function(r){var s=r.getAttribute('data-s'),e=r.getAttribute('data-e');if(r.getAttribute('data-skip')==='1')return;if(s<=now&&now<e){if(!cur)cur=r}else if(s>now&&(!nxt||s<nxt.getAttribute('data-s')))nxt=r});
   var dd=now.slice(0,10);days.forEach(function(d){var det=d.querySelector('details.day');if(d.getAttribute('data-d')===dd){d.classList.add('today');if(det)det.open=true}else if(init&&det)det.open=false});
   s1.textContent=cur?'Now: '+label(cur):'Nothing scheduled right now';if(cur){cur.classList.add('now');cur.querySelector('.tg').textContent='Now'}
-  if(nxt){l2='Next up: '+label(nxt)+' ('+dayName(nxt)+')';nxt.classList.add('next');nxt.querySelector('.tg').textContent='Next up'}}
+  if(nxt){l2='Next up: '+label(nxt)+' ('+dayName(nxt)+')';nxt.classList.add('next');var nl2=nxt.closest('li.fl');if(nl2)nl2.classList.add('upnext');nxt.querySelector('.tg').textContent='Next up'}}
  s2.textContent=l2;
  var p=document.getElementById('fprog');if(!p){p=document.createElement('p');p.id='fprog';p.className='fprog';stat.appendChild(p)}
- p.innerHTML='<span>'+c.n+' of '+c.total+' must-dos done</span> <button type="button" class="rs" id="frs">Reset</button>';
+ p.innerHTML='<span>'+c.n+' of '+c.total+' must-dos done</span> <button type="button" class="rs" id="frs">Reset</button>';if(!init&&p.firstChild)p.firstChild.className='cnt tick';
  var rs=document.getElementById('frs');rs.onclick=function(){done=[];save(done);paint();status()};init=false}
-app.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.chk');if(!b)return;var r=b.closest('li.rw'),k=r.getAttribute('data-k'),i=done.indexOf(k);if(i>-1)done.splice(i,1);else done.push(k);save(done);paint();status()});
+app.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.chk');if(!b)return;var r=b.closest('li.rw'),k=r.getAttribute('data-k'),i=done.indexOf(k);if(i>-1)done.splice(i,1);else done.push(k);save(done);paint();status();if(b.getAttribute('aria-pressed')==='true'){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');setTimeout(function(){b.classList.remove('pop')},400)}});
 var saved=null;
 function filter(f){app.setAttribute('data-filter',f);[].forEach.call(app.querySelectorAll('.lg[data-f]'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-f')===f?'true':'false');b.classList.toggle('on',b.getAttribute('data-f')===f)});
  var det=[].slice.call(app.querySelectorAll('details.day')),mores=[].slice.call(app.querySelectorAll('details.moreinfo'));
