@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Polo options for sales calls</title>
+<style>
+:root{--bg:#fbf1e6;--card:#fffaf4;--ink:#1c2541;--muted:#5d6580;--line:#ecd9c4;--navy:#1c2541;--orange:#e8833a;--green:#2f7d5b;--red:#b5523b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 24px 28px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:-.3px}
+.sub{color:var(--muted);margin:0 0 22px;font-size:17px}
+.pick{background:var(--navy);color:#fff;border-radius:18px;padding:22px 26px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px;align-items:center;margin-bottom:22px}
+.pick .tag{display:inline-block;background:var(--orange);color:#fff;font-weight:700;font-size:12px;letter-spacing:.8px;text-transform:uppercase;padding:4px 10px;border-radius:99px;margin-bottom:8px}
+.pick h2{margin:0;font-size:24px}
+.pick .p{color:#c9d0e6;margin:2px 0 0}
+.pick ul{margin:0;padding-left:18px;color:#e8ecf8}
+.pick b{color:#fff}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 24px 14px;margin-bottom:22px}
+.chart h3,.cards h3{margin:0 0 12px;font-size:15px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.row{display:grid;grid-template-columns:210px 1fr 150px;gap:14px;align-items:center;padding:7px 0;border-top:1px dashed var(--line)}
+.row:first-of-type{border-top:0}
+.name{font-weight:600}
+.name small{display:block;color:var(--muted);font-weight:400}
+.track{position:relative;height:18px;background:#f4e3d0;border-radius:9px}
+.bar{position:absolute;top:0;height:18px;border-radius:9px;background:#c9d0e6}
+.bar.me{background:var(--orange)}
+.bar.base{background:#9aa3c4}
+.val{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+.axis{display:grid;grid-template-columns:210px 1fr 150px;gap:14px;color:var(--muted);font-size:12px;margin-top:2px}
+.ticks{display:flex;justify-content:space-between}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.card.best{border:2px solid var(--orange)}
+.card h4{margin:0;font-size:18px}
+.meta{color:var(--muted);font-size:14px;margin:2px 0 10px}
+.ph{position:relative;width:80%;aspect-ratio:1/1;margin:0 auto 10px;border-radius:10px;overflow:hidden;background:var(--bgc,#fff)}
+.ph img{display:block;width:100%;height:100%;object-fit:cover}
+.ph{border:0;padding:0;cursor:zoom-in;display:block;font:inherit}
+.zoom{position:absolute;left:8px;bottom:8px;background:rgba(28,37,65,.82);color:#fff;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px}
+.lb{position:fixed;inset:0;background:#12182c;display:none;flex-direction:column;z-index:50}
+.lb.on{display:flex}
+.lbbar{display:flex;gap:8px;align-items:center;padding:10px 14px;color:#fff;flex-wrap:wrap}
+.lbbar b{font-size:16px;margin-right:auto}
+.lbbar button{background:#2b3560;color:#fff;border:1px solid #4a558a;border-radius:99px;padding:6px 14px;font:600 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}
+.lbbar button.sel{background:var(--orange);border-color:var(--orange)}
+.lbview{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:6px 10px 18px;-webkit-overflow-scrolling:touch}
+.lbview img{display:block;max-width:none;height:calc(100vh - 78px);width:auto;background:#fff;border-radius:8px;cursor:zoom-in}
+.lbview img.full{height:auto;width:auto;cursor:zoom-out}
+.lbhint{color:#c9d0e6;font-size:12px;padding:0 14px 8px}
+.card h4{margin-top:2px}
+.price{font-size:22px;font-weight:700;color:var(--navy);margin:2px 0 6px;letter-spacing:-.2px}
+.price small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;margin-right:6px;background:#eef0f8;color:var(--navy)}
+.pill.warn{background:#fbe3da;color:var(--red)}
+.pill.ok{background:#dcefe5;color:var(--green)}
+.pc{font-size:14.5px;margin:6px 0 0}
+.pc span{font-weight:700}
+.pc .g{color:var(--green)}.pc .r{color:var(--red)}
+.foot{color:var(--muted);font-size:13px;margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+@media(max-width:860px){.pick{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.row,.axis{grid-template-columns:1fr}.val{text-align:left}.axis>:first-child,.axis>:last-child{display:none}}
+.ship{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 24px;margin-top:22px}
+.ship h3{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.ship .lead{margin:0 0 14px;font-size:16px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sc{border-radius:14px;padding:13px 15px;font-size:14.5px;background:#fff6ea;border:1px solid var(--line)}
+.sc.w{background:#fbe9e3;border-color:#efc9bd}
+.sc b{display:block;margin-bottom:3px;font-size:15px}
+.sc small{display:block;margin-top:6px;color:var(--muted);font-size:12.5px}
+.ship .note{margin:14px 0 0;font-size:13px;color:var(--muted)}
+@media(max-width:860px){.sg{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<h1>Polo options for video sales calls</h1>
+<p class="sub">Navy polo, Tempello logo on the left chest. <b>Vendor: Vistaprint (vistaprint.com)</b>, prices read 20 Nov 2026. Photos are Vistaprint's. Our Tempello logo (the stacked version we tested, at the 3.94 in print area) is placed on each shirt. <b>Tap any shirt to see it as big as possible.</b></p>
+
+<div class="pick">
+  <div><span class="tag">Our pick</span><h2>Nike Dri-FIT Essential</h2><p class="p">Midnight Navy &middot; $44.99&ndash;$74.99 each &middot; 4.6 stars (246 reviews)</p></div>
+  <ul><li><b>Heavier fabric:</b> 7.2 oz vs 3.8 oz on the current pick</li><li>Self-fabric collar, matching buttons</li></ul>
+  <ul><li>Reviews praise the <b>embroidery</b> (the only logo method offered)</li><li>Swoosh on the sleeve; about $20 more than the current pick</li></ul>
+</div>
+
+<div class="chart"><h3>Price per shirt (low = large order, high = small order)</h3>
+ <div id="rows"></div>
+ <div class="axis"><span></span><div class="ticks"><span>$0</span><span>$30</span><span>$60</span><span>$90</span><span>$120</span></div><span></span></div>
+</div>
+
+<div class="cards"><h3 style="grid-column:1/-1;margin:0">Pros and cons</h3>
+ <div class="card"><button class="ph" style="--bgc:#f6f6f6" data-k="micropique" data-t="Sport-Tek Micropique in navy" aria-label="Open Sport-Tek Micropique in navy full size"><img src="mockups/micropique-with-logo.png" alt="Sport-Tek Micropique in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>Sport-Tek Micropique</h4><div class="price">$24.99 &ndash; $44.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill">Current pick</span><span class="pill">Embroidered</span>True Navy &middot; 4.6 (864)</div>
+  <p class="pc"><span class="g">+</span> Best-reviewed budget polo, many sizes in stock</p><p class="pc"><span class="r">&minus;</span> Light 3.8 oz fabric; embroidery only in navy</p></div>
+ <div class="card best"><button class="ph" style="--bgc:#fff" data-k="nike" data-t="Nike Dri-FIT Essential in navy" aria-label="Open Nike Dri-FIT Essential in navy full size"><img src="mockups/nike-with-logo.png" alt="Nike Dri-FIT Essential in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>Nike Dri-FIT Essential</h4><div class="price">$44.99 &ndash; $74.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill ok">Recommended</span><span class="pill">Embroidered</span><span class="pill warn">Swoosh on sleeve</span>Midnight Navy &middot; 4.6 (246)</div>
+  <p class="pc"><span class="g">+</span> Heavier fabric, Nike name, embroidery praised</p><p class="pc"><span class="r">&minus;</span> About $20 more; XS out of stock; Nike mark stays on the sleeve</p></div>
+ <div class="card"><button class="ph" style="--bgc:#fff" data-k="callaway" data-t="Callaway Opti-Vent in navy" aria-label="Open Callaway Opti-Vent in navy full size"><img src="mockups/callaway-with-logo.png" alt="Callaway Opti-Vent in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>Callaway Opti-Vent</h4><div class="price">$33.49 &ndash; $60.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill">Embroidered</span><span class="pill warn">Logo on sleeve</span>Peacoat Navy &middot; 4.8 (36)</div>
+  <p class="pc"><span class="g">+</span> Top rating, mid price, cool and dry</p><p class="pc"><span class="r">&minus;</span> Mesh look is sporty; a second brand on the sleeve (per Vistaprint's description)</p></div>
+ <div class="card"><button class="ph" style="--bgc:#fff" data-k="adidas" data-t="Adidas Ultimate Solid in navy" aria-label="Open Adidas Ultimate Solid in navy full size"><img src="mockups/adidas-with-logo.png" alt="Adidas Ultimate Solid in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>Adidas Ultimate Solid</h4><div class="price">$47.99 &ndash; $73.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill">Printed</span><span class="pill warn">Logo on sleeve</span>Team Navy &middot; 4.4 (89)</div>
+  <p class="pc"><span class="g">+</span> Stretch fabric, UPF 50+ sun protection</p><p class="pc"><span class="r">&minus;</span> Heat transfer only (no embroidery); Adidas logo shows</p></div>
+ <div class="card"><button class="ph" style="--bgc:#fff" data-k="cutterbuck" data-t="Cutter &amp; Buck Forge in navy" aria-label="Open Cutter &amp; Buck Forge in navy full size"><img src="mockups/cutterbuck-with-logo.png" alt="Cutter &amp; Buck Forge in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>Cutter &amp; Buck Forge</h4><div class="price">$42.49 &ndash; $84.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill">Embroidered</span><span class="pill">Business brand</span>Navy Blue &middot; no reviews yet</div>
+  <p class="pc"><span class="g">+</span> 4-way stretch, UPF 50+, all sizes in stock</p><p class="pc"><span class="r">&minus;</span> No customer reviews on Vistaprint</p></div>
+ <div class="card"><button class="ph" style="--bgc:#fff" data-k="travismathew" data-t="TravisMathew Cabana in navy" aria-label="Open TravisMathew Cabana in navy full size"><img src="mockups/travismathew-with-logo.png" alt="TravisMathew Cabana in navy with the Tempello logo"><span class="zoom">Tap to enlarge</span></button><h4>TravisMathew Cabana</h4><div class="price">$76.99 &ndash; $117.99 <small>per shirt &middot; Vistaprint</small></div><div class="meta"><span class="pill">Printed</span><span class="pill">Premium</span>Blue Nights &middot; no reviews yet</div>
+  <p class="pc"><span class="g">+</span> Wrinkle-resistant, lightweight, polished look</p><p class="pc"><span class="r">&minus;</span> $77&ndash;$118 each; printed only (no embroidery)</p></div>
+</div>
+
+<div class="ship"><h3>Ordering from Vistaprint: costs beyond the shirt</h3>
+<p class="lead">Our six salespeople are in the US, Mexico and Spain. Vistaprint prices are per shirt, but delivery adds cost, and it adds more when the team is in several places.</p>
+<div class="sg">
+ <div class="sc w"><b>One address per order</b>Vistaprint's help center says an order ships to a single address. Each address would need its own order, and each order pays its own shipping.<small>Source: Vistaprint help article, 2021. Not re-checked at checkout.</small></div>
+ <div class="sc w"><b>Mexico is not on Vistaprint's list</b>The US site delivers only to the US, Canada and Puerto Rico. Spain has its own Vistaprint site. Mexico has none, so Hector's shirts would need a US address and a forward (extra shipping, time, and possibly customs).<small>Source: Vistaprint help center, updated 17 Jun 2026.</small></div>
+ <div class="sc"><b>Free shipping needs $100+</b>Vistaprint advertises free economy shipping on orders of $100 or more. One polo at $45&ndash;$75 is under that, so a single-shirt order would likely pay for shipping.<small>Economy is the slowest option (as soon as 8 business days). Faster speeds cost more; prices show at checkout.</small></div>
+</div>
+<p class="note"><b>Spain:</b> Richard would order on Vistaprint's Spain site, whose catalog and prices can differ from the ones above and have not been checked. <b>Possible shortcut:</b> Vistaprint also runs a custom-quote service for large orders to several locations; not checked for six shirts. <b>Not known yet:</b> the actual shipping charge per address, and import costs. Both only appear at checkout.</p></div>
+
+<p class="foot"><b>About the logo on the photos:</b> these are mockups. The logo is shown in full color; on the polos that are embroidered it will be stitched in fewer, flatter thread colors, so the final look will be a little simpler. The sleeve marks (Nike, Adidas) are the maker's, not ours.<br><br><b>Logo method:</b> embroidered = stitched, slightly raised, durable; printed = heat transfer, flat and smooth, any colors. Vistaprint offers one method or the other on these navy polos, not both.<br>Also checked and set aside: OGIO Onyx (OGIO mark on the hem), Greg Norman Play Dry (shark logo, few reviews), Callaway Core, Nike Golf Crosshatch (S&ndash;L out of stock). Prices are Vistaprint's range per shirt: the lower number is for a larger order, the higher for a small one. The price for our exact order is still to be confirmed. Still to check: the embroidery area in Vistaprint's studio, the final price for our order, and that the navy matches the earlier shirts.</p>
+</div>
+<div class="lb" id="lb" role="dialog" aria-modal="true"><div class="lbbar"><b id="lbt"></b><button id="bf" class="sel">Full shirt</button><button id="bc">Close-up of the logo</button><button id="bp">Previous</button><button id="bn">Next</button><button id="bx">Close</button></div><div class="lbhint">Tap the picture to switch between fit-to-screen and actual size, then scroll to look around. Esc closes.</div><div class="lbview" id="lbv"><img id="lbi" alt=""></div></div>
+<script>
+(function(){var K=["micropique","nike","callaway","adidas","cutterbuck","travismathew"],T={},cur=0,mode="mockups",lb=document.getElementById("lb"),im=document.getElementById("lbi");
+document.querySelectorAll(".ph[data-k]").forEach(function(b){T[b.dataset.k]=b.dataset.t;b.addEventListener("click",function(){cur=K.indexOf(b.dataset.k);mode="mockups";show();lb.classList.add("on");document.body.style.overflow="hidden"})});
+function show(){var k=K[cur];im.className="";im.src=(mode=="mockups"?"mockups/"+k+"-with-logo.png":"closeups/"+k+"-closeup.png");im.alt=T[k]+" with the Tempello logo";document.getElementById("lbt").textContent=T[k];document.getElementById("bf").className=mode=="mockups"?"sel":"";document.getElementById("bc").className=mode=="closeups"?"sel":"";document.getElementById("lbv").scrollTo(0,0)}
+function close(){lb.classList.remove("on");document.body.style.overflow=""}
+im.addEventListener("click",function(){im.classList.toggle("full")});
+document.getElementById("bf").onclick=function(){mode="mockups";show()};document.getElementById("bc").onclick=function(){mode="closeups";show()};
+document.getElementById("bp").onclick=function(){cur=(cur+5)%6;show()};document.getElementById("bn").onclick=function(){cur=(cur+1)%6;show()};document.getElementById("bx").onclick=close;
+if(/^#open-(\d)(c?)$/.test(location.hash)){var q=location.hash.match(/^#open-(\d)(c?)$/);cur=+q[1];mode=q[2]?"closeups":"mockups";show();lb.classList.add("on")}
+document.addEventListener("keydown",function(e){if(!lb.classList.contains("on"))return;if(e.key=="Escape")close();if(e.key=="ArrowRight"){cur=(cur+1)%6;show()}if(e.key=="ArrowLeft"){cur=(cur+5)%6;show()}});
+})();
+</script>
+<script>
+var D=[["Sport-Tek Micropique","True Navy",24.99,44.99,"base"],["Nike Dri-FIT Essential","Midnight Navy",44.99,74.99,"me"],["Callaway Opti-Vent","Peacoat Navy",33.49,60.99,""],["Adidas Ultimate Solid","Team Navy",47.99,73.99,""],["Cutter & Buck Forge","Navy Blue",42.49,84.99,""],["TravisMathew Cabana","Blue Nights",76.99,117.99,""]];
+var h="";D.forEach(function(d){var l=d[2]/120*100,w=(d[3]-d[2])/120*100;h+='<div class="row"><div class="name">'+d[0].replace("&","&amp;")+'<small>'+d[1]+'</small></div><div class="track"><div class="bar '+d[4]+'" style="left:'+l+'%;width:'+w+'%"></div></div><div class="val">$'+d[2].toFixed(0)+' &ndash; $'+d[3].toFixed(0)+'</div></div>'});
+document.getElementById("rows").innerHTML=h;
+document.documentElement.setAttribute("data-h",document.documentElement.scrollHeight);window.addEventListener("load",function(){document.documentElement.setAttribute("data-h",document.documentElement.scrollHeight)});</script></body></html>
