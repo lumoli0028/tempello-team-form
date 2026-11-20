@@ -38,14 +38,19 @@ h1{font-size:30px;margin:0 0 4px;letter-spacing:-.3px}
 .zoom{position:absolute;left:8px;bottom:8px;background:rgba(28,37,65,.82);color:#fff;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px}
 .lb{position:fixed;inset:0;background:#12182c;display:none;flex-direction:column;z-index:50}
 .lb.on{display:flex}
-.lbbar{display:flex;gap:8px;align-items:center;padding:10px 14px;color:#fff;flex-wrap:wrap}
+.lbbar{display:flex;gap:6px;align-items:center;padding:10px 14px;color:#fff;flex-wrap:wrap}
 .lbbar b{font-size:16px;margin-right:auto}
 .lbbar button{background:#2b3560;color:#fff;border:1px solid #4a558a;border-radius:99px;padding:6px 14px;font:600 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}
 .lbbar button.sel{background:var(--orange);border-color:var(--orange)}
 .lbview{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:6px 10px 18px;-webkit-overflow-scrolling:touch}
-.lbview img{display:block;max-width:none;height:calc(100vh - 78px);width:auto;background:#fff;border-radius:8px;cursor:zoom-in}
-.lbview img.full{height:auto;width:auto;cursor:zoom-out}
+.lbw{position:relative;display:inline-block;line-height:0}
+.lbview{min-height:0}
+.lbview img{display:block;width:auto;height:auto;max-width:calc(100vw - 20px);max-height:var(--ah,70vh);background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;-webkit-user-drag:none;user-select:none}
+.lens{position:absolute;width:240px;height:240px;border-radius:50%;border:3px solid #fff;box-shadow:0 8px 28px rgba(0,0,0,.55);background-color:#fff;background-repeat:no-repeat;pointer-events:none;display:none;z-index:3}
+.lbbar .zl{font-size:13px;color:#c9d0e6;margin-left:6px}
+.lbbar button.z{padding:6px 11px}
 .lbhint{color:#c9d0e6;font-size:12px;padding:0 14px 8px}
+@media(max-width:600px){.lbbar{padding:8px 10px}.lbbar b{flex-basis:100%;font-size:15px}.lbbar button{padding:6px 11px;font-size:13px}.lbhint{padding:0 10px 6px}}
 .card h4{margin-top:2px}
 .price{font-size:22px;font-weight:700;color:var(--navy);margin:2px 0 6px;letter-spacing:-.2px}
 .price small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
@@ -108,13 +113,23 @@ h1{font-size:30px;margin:0 0 4px;letter-spacing:-.3px}
 
 <p class="foot"><b>About the logo on the photos:</b> these are mockups. The logo is shown in full color; on the polos that are embroidered it will be stitched in fewer, flatter thread colors, so the final look will be a little simpler. The sleeve marks (Nike, Adidas) are the maker's, not ours.<br><br><b>Logo method:</b> embroidered = stitched, slightly raised, durable; printed = heat transfer, flat and smooth, any colors. Vistaprint offers one method or the other on these navy polos, not both.<br>Also checked and set aside: OGIO Onyx (OGIO mark on the hem), Greg Norman Play Dry (shark logo, few reviews), Callaway Core, Nike Golf Crosshatch (S&ndash;L out of stock). Prices are Vistaprint's range per shirt: the lower number is for a larger order, the higher for a small one. The price for our exact order is still to be confirmed. Still to check: the embroidery area in Vistaprint's studio, the final price for our order, and that the navy matches the earlier shirts.</p>
 </div>
-<div class="lb" id="lb" role="dialog" aria-modal="true"><div class="lbbar"><b id="lbt"></b><button id="bf" class="sel">Full shirt</button><button id="bc">Close-up of the logo</button><button id="bp">Previous</button><button id="bn">Next</button><button id="bx">Close</button></div><div class="lbhint">Tap the picture to switch between fit-to-screen and actual size, then scroll to look around. Esc closes.</div><div class="lbview" id="lbv"><img id="lbi" alt=""></div></div>
+<div class="lb" id="lb" role="dialog" aria-modal="true"><div class="lbbar"><b id="lbt"></b><button id="bf" class="sel">Full shirt</button><button id="bc">Close-up of the logo</button><span class="zl">Magnify</span><button class="z sel" data-z="3">3&times;</button><button class="z" data-z="5">5&times;</button><button id="bp">Previous</button><button id="bn">Next</button><button id="bx">Close</button></div><div class="lbhint">On a computer, move the mouse over the shirt. On a phone, touch and hold the shirt, then drag. Esc closes.</div><div class="lbview" id="lbv"><div class="lbw" id="lbw"><img id="lbi" alt=""><div class="lens" id="lens"></div></div></div></div>
 <script>
 (function(){var K=["micropique","nike","callaway","adidas","cutterbuck","travismathew"],T={},cur=0,mode="mockups",lb=document.getElementById("lb"),im=document.getElementById("lbi");
-document.querySelectorAll(".ph[data-k]").forEach(function(b){T[b.dataset.k]=b.dataset.t;b.addEventListener("click",function(){cur=K.indexOf(b.dataset.k);mode="mockups";show();lb.classList.add("on");document.body.style.overflow="hidden"})});
-function show(){var k=K[cur];im.className="";im.src=(mode=="mockups"?"mockups/"+k+"-with-logo.png":"closeups/"+k+"-closeup.png");im.alt=T[k]+" with the Tempello logo";document.getElementById("lbt").textContent=T[k];document.getElementById("bf").className=mode=="mockups"?"sel":"";document.getElementById("bc").className=mode=="closeups"?"sel":"";document.getElementById("lbv").scrollTo(0,0)}
+document.querySelectorAll(".ph[data-k]").forEach(function(b){T[b.dataset.k]=b.dataset.t;b.addEventListener("click",function(){cur=K.indexOf(b.dataset.k);mode="mockups";show();lb.classList.add("on");document.body.style.overflow="hidden";fit()})});
+function show(){var k=K[cur];lens.style.display="none";im.src=(mode=="mockups"?"mockups/"+k+"-with-logo.png":"closeups/"+k+"-closeup.png");im.alt=T[k]+" with the Tempello logo";document.getElementById("lbt").textContent=T[k];document.getElementById("bf").className=mode=="mockups"?"sel":"";document.getElementById("bc").className=mode=="closeups"?"sel":"";document.getElementById("lbv").scrollTo(0,0)}
 function close(){lb.classList.remove("on");document.body.style.overflow=""}
-im.addEventListener("click",function(){im.classList.toggle("full")});
+var lens=document.getElementById("lens"),Z=3,LS=240;
+function fit(){var v=document.getElementById("lbv");v.style.setProperty("--ah",Math.max(200,v.clientHeight-14)+"px");LS=innerWidth<600?170:240;lens.style.width=lens.style.height=LS+"px"}
+im.addEventListener("load",fit);window.addEventListener("resize",fit);
+function mag(cx,cy,touch){var r=im.getBoundingClientRect(),x=cx-r.left,y=cy-r.top;if(x<0||y<0||x>r.width||y>r.height){lens.style.display="none";return}
+lens.style.display="block";var ly=touch?y-LS*0.75:y;lens.style.left=(x-LS/2)+"px";lens.style.top=(ly-LS/2)+"px";
+lens.style.backgroundImage="url('"+im.currentSrc+"')";lens.style.backgroundSize=(r.width*Z)+"px "+(r.height*Z)+"px";lens.style.backgroundPosition=(-(x*Z-LS/2))+"px "+(-(y*Z-LS/2))+"px"}
+im.addEventListener("mousemove",function(e){mag(e.clientX,e.clientY,false)});
+im.addEventListener("mouseleave",function(){lens.style.display="none"});
+["touchstart","touchmove"].forEach(function(n){im.addEventListener(n,function(e){e.preventDefault();var t=e.touches[0];mag(t.clientX,t.clientY,true)},{passive:false})});
+im.addEventListener("touchend",function(){lens.style.display="none"});
+document.querySelectorAll(".lbbar .z").forEach(function(b){b.onclick=function(){Z=+b.dataset.z;document.querySelectorAll(".lbbar .z").forEach(function(o){o.className="z"+(o===b?" sel":"")})}});
 document.getElementById("bf").onclick=function(){mode="mockups";show()};document.getElementById("bc").onclick=function(){mode="closeups";show()};
 document.getElementById("bp").onclick=function(){cur=(cur+5)%6;show()};document.getElementById("bn").onclick=function(){cur=(cur+1)%6;show()};document.getElementById("bx").onclick=close;
 if(/^#open-(\d)(c?)$/.test(location.hash)){var q=location.hash.match(/^#open-(\d)(c?)$/);cur=+q[1];mode=q[2]?"closeups":"mockups";show();lb.classList.add("on")}
